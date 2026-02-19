@@ -17,9 +17,8 @@ const config = {
 
   url: 'https://rsujathacse.github.io',
   baseUrl: '/',
-
   organizationName: 'rsujathacse',
-  projectName: 'sujatha-portfolio',
+  projectName: 'rsujathacse.github.io',
 
   onBrokenLinks: 'throw',
 
