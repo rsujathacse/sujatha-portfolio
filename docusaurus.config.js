@@ -95,14 +95,16 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       colorMode: {
-        respectPrefersColorScheme: true,
-      },
+    defaultMode: 'light',
+    disableSwitch: true,             // hides the moon icon (toggle) for now. to work on later.
+    respectPrefersColorScheme: false // ignores system dark mode for now. to work on later.
+},
 
       navbar: {
         title: 'Sujatha R',
         logo: {
-          alt: 'Sujatha R',
-          src: 'img/logo.svg',
+          alt: 'Sujatha R writer image',
+          src: '/img/sujathar.png',
         },
         items: [
           {to: '/aiml/intro', label: 'AI/ML Docs', position: 'left'},
