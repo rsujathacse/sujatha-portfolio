@@ -20,10 +20,6 @@ const config = {
     v4: true,
   },
 
-  url: 'https://rsujathacse.github.io',
-  baseUrl: '/',
-  organizationName: 'rsujathacse',
-  projectName: 'rsujathacse.github.io',
 
   onBrokenLinks: 'throw',
 
