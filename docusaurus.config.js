@@ -9,7 +9,12 @@ const config = {
   tagline:
     '10+ years translating complex cloud and AI systems into clear, developer-ready docs.',
   favicon: 'img/favicon.ico',
+  url: 'https://rsujathacse.github.io',
+  baseUrl: '/',
+  trailingSlash: true,   // ← ADD HERE
 
+  organizationName: 'rsujathacse',
+  projectName: 'rsujathacse.github.io',
 
   future: {
     v4: true,
@@ -94,6 +99,16 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      metadata: [
+    {
+      name: "description",
+      content:
+        "Senior Technical Writer crafting revenue-driving technical docs.",
+    },
+  ],
+
+  image: "img/social-card.png",
+
       colorMode: {
     defaultMode: 'light',
     disableSwitch: true,             // hides the moon icon (toggle) for now. to work on later.
