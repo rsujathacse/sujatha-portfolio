@@ -3,6 +3,7 @@ const sidebarsAiml = {
   aimlSidebar: [
     'intro',
     'do-articles',
+    'build-retrieval-ready-doc-pipeline',
   ],
 };
 
