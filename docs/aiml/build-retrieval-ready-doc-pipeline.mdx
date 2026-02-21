@@ -5,17 +5,15 @@ description: Learn how to design and deploy a documentation pipeline optimized f
 
 # Build a Retrieval-Ready Documentation Pipeline on a Cloud VM
 
-When you build a chatbot or a RAG-based assistant, the model does not magically know your product documentation, policies, or internal processes. 
-It only knows what it was trained on broadly; not your specific, private, or up-to-date content.
-
-So when a user asks:
+When you build a chatbot or a <a href="https://www.digitalocean.com/resources/articles/rag" target="_blank" rel="noopener noreferrer">RAG</a>-based assistant, the model does not magically know your product documentation, policies, or internal processes. So when a user asks:
 
 - “How do I rotate my API key?”
 
 - “What’s our refund policy for enterprise customers?”
 
 - “How do I deploy this service on staging?”
-The model doesn’t already know your product docs. It must fetch the relevant information first.
+
+The model doesn’t already know your product docs. It only knows what it was trained on broadly; not your specific or up-to-date content. It must fetch the relevant information first based on semantic similarity (how closely two pieces of text match in meaning, not just keywords). 
 
 Here’s what happens in simple terms:
 
