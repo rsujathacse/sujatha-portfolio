@@ -6,45 +6,94 @@ pagination_prev: null
 
 import Link from '@docusaurus/Link';
 
-Documentation focused on embeddings, LLM integration, and AI workflows.
+<!-- ✅ Fix: remove the OUTER wrapper border, and give EACH card its own border -->
 
-<div style={{
-  marginTop: '2rem',
-  maxWidth: '520px',
-  border: '1px solid var(--ifm-color-emphasis-200)',
-  borderRadius: '16px',
-  overflow: 'hidden',
-  boxShadow: '0 10px 30px rgba(0,0,0,0.06)'
-}}>
+<!-- Replace your current outer bordered container with this grid container (NO border here) -->
+<div
+  style={{
+    marginTop: "2rem",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "1.5rem",
+    alignItems: "start"
+  }}
+>
+  {/* Card 1 */}
+  <div
+    style={{
+      border: "1px solid var(--ifm-color-emphasis-200)",
+      borderRadius: "16px",
+      overflow: "hidden",
+      background: "var(--ifm-background-surface-color)",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.06)"
+    }}
+  >
+    <img
+      src="/img/aiml/sujathar-profile-digitalocean.png"
+      alt="Sujatha R - AI/ML technical writing docs"
+      style={{ width: "100%", display: "block" }}
+    />
 
-  <img
-    src="/img/aiml/sujathar-profile-digitalocean.png"
-    alt="Sujatha R - AI/ML technical writing docs"
-    style={{ width: '100%', display: 'block' }}
-  />
+    <div style={{ padding: "1.5rem" }}>
+      <h2 style={{ marginTop: 0 }}>Articles I Wrote for DigitalOcean</h2>
 
-  <div style={{ padding: '1.5rem' }}>
-    <h2 style={{ marginTop: 0 }}>
-      Articles I Wrote for DigitalOcean
-    </h2>
+      <p style={{ marginBottom: "1.25rem" }}>
+        Technical deep-dives covering embeddings, LLM integration, inference workflows,
+        and production-ready AI architecture.
+      </p>
 
-    <p style={{ marginBottom: '1.25rem' }}>
-      Technical deep-dives covering embeddings, LLM integration,
-      inference workflows, and production-ready AI architecture.
-    </p>
+      <Link
+        to="/aiml/do-articles"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          fontWeight: 600,
+          textDecoration: "none"
+        }}
+      >
+        View articles →
+      </Link>
+    </div>
+  </div>
 
-    <Link
-      to="/aiml/do-articles"
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        fontWeight: 600,
-        textDecoration: 'none'
-      }}
-    >
-      View Articles →
-    </Link>
+  {/* Card 2 */}
+  <div
+    style={{
+      border: "1px solid var(--ifm-color-emphasis-200)",
+      borderRadius: "16px",
+      overflow: "hidden",
+      background: "var(--ifm-background-surface-color)",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.06)"
+    }}
+  >
+    <img
+      src="/img/aiml/doc-pipeline/create-droplet.png"
+      alt="DigitalOcean droplet creation page"
+      style={{ width: "100%", display: "block" }}
+    />
 
+    <div style={{ padding: "1.5rem" }}>
+      <h2 style={{ marginTop: 0 }}>Build a retrieval-ready documentation pipeline on a cloud VM</h2>
+
+      <p style={{ marginBottom: "1.25rem" }}>
+        Build a documentation pipeline on a cloud VM that structures, chunks, and prepares content
+        for retrieval systems. This tutorial walks through Docker-based deployment, API setup, and
+        generating retrieval-ready artifacts for future RAG integration.
+      </p>
+
+      <Link
+        to="/aiml/build-retrieval-ready-doc-pipeline"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          fontWeight: 600,
+          textDecoration: "none"
+        }}
+      >
+        Read article →
+      </Link>
+    </div>
   </div>
 </div>

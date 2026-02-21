@@ -1,6 +1,19 @@
 /* ============================= */
 /* Clean single-row centered footer */
 /* ============================= */
+.docCard {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 18px;
+  padding: 1.75rem;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.docCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+}
 
 .footer {
   background: #f6f7f9;
