@@ -106,9 +106,6 @@ Log in to your cloud provider dashboard and create a new virtual machine with th
 - Disk: 120GB
 - Authentication: SSH key
 - Monitoring: Optional (enabled for observability)
-
-Once provisioned, note the public IPv4 address.
-
 <figure style={{ textAlign: "center", margin: "2rem 0" }}>
   <img
     src="/img/aiml/doc-pipeline/create-droplet.png"
@@ -116,9 +113,13 @@ Once provisioned, note the public IPv4 address.
     style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }}
   />
   <figcaption style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}>
-    Creating a DigitalOcean Droplet (VM).
+    DigitalOcean Droplet (VM) creation
   </figcaption>
 </figure>
+
+Once provisioned, note the public IPv4 address.
+
+
 <figure style={{ textAlign: "center", margin: "2rem 0" }}>
   <img
     src="/img/aiml/doc-pipeline/droplet-ip.png"
@@ -126,7 +127,7 @@ Once provisioned, note the public IPv4 address.
     style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }}
   />
   <figcaption style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}>
-    Created a DigitalOcean Droplet (VM).
+    Created a DigitalOcean Droplet
   </figcaption>
 </figure>
 
@@ -176,7 +177,7 @@ docker compose version
 
 <figure style={{ textAlign: "center", margin: "2rem 0" }}> 
   <img 
-  src="/img/aiml/docker-installed.png" 
+  src="/img/aiml/doc-pipeline/docker-installed.png" 
   alt="Terminal showing docker and docker compose versions" 
   style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }} /> 
   <figcaption style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}> 
@@ -291,7 +292,22 @@ Start the service
 docker compose up -d
 docker compose ps
 ```
-<figure style={{ textAlign: "center", margin: "2rem 0" }}> <img src="/img/aiml/docker-compose-running.png" alt="Docker compose ps output showing running FastAPI container" style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }} /> <figcaption style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}> FastAPI service running inside Docker. </figcaption> </figure>
+  ```mdx
+<figure style={{ textAlign: "center", margin: "2rem 0" }}>
+  <img
+    src="/img/aiml/doc-pipeline/docker-compose-running.png"
+    alt="Docker compose ps output showing running FastAPI container"
+    style={{
+      borderRadius: "12px",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+      maxWidth: "100%"
+    }}
+  />
+  <figcaption style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}>
+    FastAPI service running inside Docker.
+  </figcaption>
+</figure>
+  ```
 
 You should see the api container in a running state.
 
@@ -305,7 +321,7 @@ Expected response:
 {"status":"ok"}
 ```
 
-<figure style={{ textAlign: "center", margin: "2rem 0" }}> <img src="/img/aiml/health-endpoint.png" alt="Terminal showing successful curl response from health endpoint" style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }} /> 
+<figure style={{ textAlign: "center", margin: "2rem 0" }}> <img src="/img/aiml/doc-pipeline/health-endpoint.png" alt="Terminal showing successful curl response from health endpoint" style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }} /> 
 <figcaption style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}> Verifying the API health endpoint. </figcaption> 
 </figure>
 
@@ -421,7 +437,7 @@ This ensures:
 
 <figure style={{ textAlign: "center", margin: "2rem 0" }}>
   <img
-    src="/img/aiml/deploy-md-structure.png"
+    src="/img/aiml/doc-pipeline/deploy-md-structure.png"
     alt="Structured Markdown file with H2 and H3 boundaries"
     style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }}
   />
@@ -583,7 +599,7 @@ You should see structured JSON similar to:
 ```
 
 <figure style={{ textAlign: "center", margin: "2rem 0" }}> 
-<img src="/img/aiml/chunks-generated.png" alt="Terminal showing chunks.json file generated successfully" style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }} /> 
+<img src="/img/aiml/doc-pipeline/chunks-generated.png" alt="Terminal showing chunks.json file generated successfully" style={{ borderRadius: "12px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", maxWidth: "100%" }} /> 
 <figcaption style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}> 
 Retrieval-ready JSON artifact generated from structured Markdown. 
 </figcaption> 
