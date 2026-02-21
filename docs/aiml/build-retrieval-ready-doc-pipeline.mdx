@@ -5,7 +5,33 @@ description: Learn how to design and deploy a documentation pipeline optimized f
 
 # Build a Retrieval-Ready Documentation Pipeline on a Cloud VM
 
-Modern documentation is no longer written just for humans. Search engines, internal knowledge bases, and Retrieval-Augmented Generation (RAG) systems now consume documentation as structured data. If your docs are not chunked, indexed, and enriched with metadata, AI systems cannot reliably retrieve or reason over them.
+When you build a chatbot or a RAG-based assistant, the model does not magically know your product documentation, policies, or internal processes. 
+It only knows what it was trained on broadly; not your specific, private, or up-to-date content.
+
+So when a user asks:
+
+- “How do I rotate my API key?”
+
+- “What’s our refund policy for enterprise customers?”
+
+- “How do I deploy this service on staging?”
+The model doesn’t already know your product docs. It must fetch the relevant information first.
+
+Here’s what happens in simple terms:
+
+1. The question is converted into an embedding.
+
+2 The system searches a vector database.
+
+3. It retrieves the most relevant documentation chunks.
+
+4. Those chunks are sent to the model as context.
+
+5. The model generates an answer grounded in them.
+
+So the system isn’t reading full pages. It’s retrieving specific fragments of documentation.
+
+That’s why structure matters. If your docs aren’t cleanly chunked and well-labeled, retrieval becomes unreliable — and so do your answers.
 
 ### How this tutorial connects to RAG systems
 
