@@ -8,7 +8,7 @@ const config = {
   title: 'Sujatha R',
   tagline:
     '10+ years translating complex cloud and AI systems into clear, developer-ready docs.',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/sujathar.png',
   url: 'https://rsujathacse.github.io',
   baseUrl: '/',
   trailingSlash: true,   // ← ADD HERE
