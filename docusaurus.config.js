@@ -105,8 +105,6 @@ const config = {
           {to: '/aiml/intro', label: 'AI/ML Docs', position: 'left'},
           {to: '/docs/intro', label: 'Docs', position: 'left'},
           {to: '/apis/intro', label: 'APIs', position: 'left'},
-          {to: '/architecture/intro', label: 'Architecture', position: 'left'},
-          {to: '/strategy/intro', label: 'Content Strategy', position: 'left'},
           {to: '/experience', label: 'Experience', position: 'left'},
         
         ],
