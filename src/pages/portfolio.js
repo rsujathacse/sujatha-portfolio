@@ -19,16 +19,6 @@ const cards = [
     description: "API reference samples, OpenAPI structure, and developer experience patterns.",
     to: "/apis/intro",
   },
-  {
-    title: "Architecture",
-    description: "Architecture narratives and diagrams that explain how systems work end-to-end.",
-    to: "/architecture/intro",
-  },
-  {
-    title: "Content Strategy",
-    description: "Content planning, SEO and GEO-led doc strategy, and technical content systems.",
-    to: "/strategy/intro",
-  },
 ];
 
 export default function Portfolio() {
