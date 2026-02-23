@@ -4,14 +4,17 @@ const sidebars = {
     'intro',
     'vector-search-hybrid',
     'do-articles',
-    ],
-  {
-  type: 'doc',
-  id: 'architecture/prometheus-otel',
-},
-{
-  type: 'doc',
-  id: 'strategy/full-funnel-technical-content-strategy',
-},
+
+    // Bring these two docs into the Docs sidebar (flat list)
+    {
+      type: 'doc',
+      id: 'architecture/prometheus-otel',
+    },
+    {
+      type: 'doc',
+      id: 'strategy/full-funnel-technical-content-strategy',
+    },
+  ],
 };
+
 module.exports = sidebars;
