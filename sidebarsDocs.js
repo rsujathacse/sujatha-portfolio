@@ -4,16 +4,8 @@ const sidebars = {
     'intro',
     'vector-search-hybrid',
     'do-articles',
-
-    // Bring these two docs into the Docs sidebar (flat list)
-    {
-      type: 'doc',
-      id: 'architecture/prometheus-otel',
-    },
-    {
-      type: 'doc',
-      id: 'strategy/full-funnel-technical-content-strategy',
-    },
+    'prometheus-otel',
+    'full-funnel-technical-content-strategy',
   ],
 };
 
