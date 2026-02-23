@@ -5,9 +5,9 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Sujatha R',
+  title: 'I write technical docs that move products from evaluation → adoption → revenue.',
   tagline:
-    '10+ years translating complex cloud and AI systems into clear, developer-ready docs.',
+    '10+ years translating complex cloud and AI systems into clear, user-ready docs.',
   favicon: 'img/sujathar.png',
   url: 'https://rsujathacse.github.io',
   baseUrl: '/',

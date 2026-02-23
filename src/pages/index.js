@@ -6,7 +6,7 @@ import styles from "./index.module.css";
 export default function Home() {
   return (
     <Layout
-      title="Sujatha R"
+      title="I write technical docs that move products from evaluation → adoption → revenue."
       description="Senior Technical Writer focusing on cloud, APIs, and AI/ML workflows."
     >
       <main>
@@ -14,10 +14,10 @@ export default function Home() {
         {/* HERO — Clean, neutral */}
         <section className={styles.hero}>
           <div className={styles.heroInner}>
-            <h1 className={styles.heroTitle}>Sujatha R</h1>
+            <h1 className={styles.heroTitle}>I write technical docs that move products from evaluation → adoption → revenue</h1>
 
             <p className={styles.heroKicker}>
-              10+ years crafting complex cloud and AI systems into clear, developer-ready docs.
+              10+ years crafting complex cloud and AI systems into clear, user-ready docs.
             </p>
 
             <p className={styles.heroBody}>
