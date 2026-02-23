@@ -6,8 +6,6 @@ const navItems = [
   { to: "/aiml/intro", label: "AI/ML Docs" },
   { to: "/docs/intro", label: "Docs" },
   { to: "/apis/intro", label: "APIs" },
-  { to: "/architecture/intro", label: "Architecture" },
-  { to: "/strategy/intro", label: "Content Strategy" },
 ];
 
 function Role({ company, title, location, dates, bullets }) {
