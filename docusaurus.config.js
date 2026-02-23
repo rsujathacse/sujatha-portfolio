@@ -63,15 +63,7 @@ const config = {
         sidebarPath: './sidebarsApis.js',
       },
     ],
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'architecture',
-        path: 'docs/architecture',
-        routeBasePath: 'architecture',
-        sidebarPath: './sidebarsArchitecture.js',
-      },
-    ],
+ 
     [
       '@docusaurus/plugin-content-docs',
       {
@@ -81,15 +73,7 @@ const config = {
         sidebarPath: './sidebarsAiml.js',
       },
     ],
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'strategy',
-        path: 'docs/strategy',
-        routeBasePath: 'strategy',
-        sidebarPath: './sidebarsStrategy.js',
-      },
-    ],
+
   ],
 
   themeConfig:
