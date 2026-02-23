@@ -10,53 +10,108 @@ import DoArticlesCard from '@site/src/components/DoArticlesCard';
 
 Conceptual guides and implementation-focused tutorials.
 
-<div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
-
-  <div style={{ 
-    border: "1px solid #e3e3e3",
-    borderRadius: "12px",
-    padding: "20px",
-    width: "320px",
-    height: "fit-content",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
-  }}>
-    <img 
+<div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: "24px",
+    marginTop: "40px",
+    alignItems: "start",
+  }}
+>
+  {/* Card 1 — Vector Search */}
+  <div
+    style={{
+      border: "1px solid #e3e3e3",
+      borderRadius: "12px",
+      padding: "20px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+      background: "#fff",
+    }}
+  >
+    <img
       src="/img/Elasticsearch.png"
       alt="Elasticsearch Hybrid Search"
-      style={{ width: "100%", borderRadius: "8px", marginBottom: "12px" }}
+      style={{
+        width: "100%",
+        borderRadius: "8px",
+        marginBottom: "12px",
+        display: "block",
+      }}
     />
-    <h3>Vector Search and Hybrid Retrieval in Elasticsearch</h3>
-    <p>
-      Production-focused implementation of BM25 + dense vector hybrid search 
-      using Elasticsearch.
+
+    <h3 style={{ marginTop: 0 }}>
+      Vector Search and Hybrid Retrieval in Elasticsearch
+    </h3>
+
+    <p style={{ marginBottom: "12px" }}>
+      Production-focused implementation of BM25 + dense vector hybrid search using
+      Elasticsearch.
     </p>
-    <a href="/docs/vector-search-hybrid" 
-       style={{ color: "#0f62fe", fontWeight: "600" }}>
+
+    <a
+      href="/docs/vector-search-hybrid"
+      style={{ color: "#0f62fe", fontWeight: "600" }}
+    >
       Read article →
     </a>
   </div>
-<div style={{ display: "flex", gap: "24px", marginTop: "40px", flexWrap: "wrap" }}>
 
-  <div style={{ flex: "1 1 45%", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "24px" }}>
-    <h3>Prometheus ↔ OpenTelemetry Interoperability</h3>
-    <p>
-    LFX Mentorship Submission (CNCF – Prometheus, 2026 Term 1).
-    Deep-dive documentation on native histograms, OTLP transformation, collector pipelines, and validation workflows.
+  {/* Card 2 — Prometheus ↔ OTel */}
+  <div
+    style={{
+      border: "1px solid #e3e3e3",
+      borderRadius: "12px",
+      padding: "20px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+      background: "#fff",
+    }}
+  >
+    <h3 style={{ marginTop: 0 }}>
+      Prometheus ↔ OpenTelemetry Interoperability
+    </h3>
+
+    <p style={{ marginBottom: "12px" }}>
+      LFX Mentorship Submission (CNCF – Prometheus, 2026 Term 1). Deep dive into
+      native histograms, OTLP transformation, collector pipelines, and validation
+      workflows.
     </p>
-    <a href="/docs/prometheus-otel">Read article →</a>
+
+    <a
+      href="/docs/prometheus-otel"
+      style={{ color: "#0f62fe", fontWeight: "600" }}
+    >
+      Read article →
+    </a>
   </div>
 
-  <div style={{ flex: "1 1 45%", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "24px" }}>
-    <h3>Full-Funnel Technical Content Strategy</h3>
-    <p>
-      A structured framework aligning TOFU, MOFU, and BOFU technical content
-      to drive developer adoption and measurable business growth.
+  {/* Card 3 — Full-Funnel Strategy */}
+  <div
+    style={{
+      border: "1px solid #e3e3e3",
+      borderRadius: "12px",
+      padding: "20px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+      background: "#fff",
+    }}
+  >
+    <h3 style={{ marginTop: 0 }}>Full-Funnel Technical Content Strategy</h3>
+
+    <p style={{ marginBottom: "12px" }}>
+      A structured framework aligning TOFU, MOFU, and BOFU technical content to
+      drive developer adoption and measurable business growth.
     </p>
-    <a href="/docs/full-funnel-technical-content-strategy">Read article →</a>
+
+    <a
+      href="/docs/full-funnel-technical-content-strategy"
+      style={{ color: "#0f62fe", fontWeight: "600" }}
+    >
+      Read article →
+    </a>
   </div>
 
-</div>
-
-  <DoArticlesCard />
-
+  {/* Card 4 — DigitalOcean Articles */}
+  <div style={{ alignSelf: "start" }}>
+    <DoArticlesCard />
+  </div>
 </div>
