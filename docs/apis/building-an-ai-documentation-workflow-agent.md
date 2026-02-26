@@ -202,7 +202,7 @@ The documentation workflow agent begins with a structured product ticket. The mo
 
 In this project, the ticket `KAN-4` ("Consent-aware event tracking for experiment goals") was used as the input example.
 
-![Structured Jira ticket used as input](./images/jira-structured-ticket.png)
+![Structured Jira ticket used as input](/img/JIRA/jira-structured-ticket.png)
 
 ---
 
@@ -391,3 +391,4 @@ This project demonstrates a foundational documentation workflow automation servi
 
 - **Containerization and deployment automation**  
   Package the service using Docker and deploy via CI/CD pipelines.
+
