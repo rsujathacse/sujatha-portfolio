@@ -4,6 +4,7 @@ const sidebars = {
     'intro',
         
     'secure-security-event-ingestion-api',
+    'building-an-ai-documentation-workflow-agent',
 
      
   ],
