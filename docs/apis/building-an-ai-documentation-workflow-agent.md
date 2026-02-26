@@ -209,7 +209,7 @@ In this project, the ticket `KAN-4` ("Consent-aware event tracking for experimen
 ### Step 2: Set up the server environment
 
 The first step is to provision a Linux-based server capable of running a Python API service. In this project, a DigitalOcean Droplet running Ubuntu 24.04 LTS was used as the execution environment. 
-![Python virtual environment activated with FastAPI installed](./images/digitalocean-droplet.png)
+![Python virtual environment activated with FastAPI installed](/img/JIRA/digitalocean-droplet.png)
 After provisioning the server:
 
 - Create a project directory (e.g., `ai-doc-workflow-agent`)
@@ -221,7 +221,7 @@ After provisioning the server:
   - `python .env`
   - `pydantic`
 
-![Python virtual environment activated with FastAPI installed](./images/venv-fastapi-setup.png)
+![Python virtual environment activated with FastAPI installed](/img/JIRA/venv-fastapi-setup.png)
 
 ### Step 3: Create the FastAPI application and define the `/plan` endpoint
 
@@ -255,7 +255,7 @@ The response structure:
   "preview": "# Documentation Plan — KAN-4..."
 }
 ```
-![The FastAPI service running with Swagger UI](./images/swagger-ui.png)
+![The FastAPI service running with Swagger UI](/img/JIRA/swagger-ui.png)
 
 ### Step 4: Add AI generation and deterministic fallback logic
 
@@ -305,7 +305,7 @@ By implementing deterministic fallback logic, the documentation workflow:
 - Demonstrates production-aware system design
 
 
-![Terminal showing successful POST request to /plan with 200 OK](./images/post-plan-success.png)
+![Terminal showing successful POST request to /plan with 200 OK](/img/JIRA/post-plan-success.png)
 
 ### Step 5: Run the service and validate using curl
 
@@ -339,14 +339,14 @@ Confirm the following:
  
 - A timestamped Markdown file is created in the project directory
 
-![Terminal showing success with 200 OK](./images/uvicorn-8002.png)
+![Terminal showing success with 200 OK](/img/JIRA/uvicorn-8002.png)
 
 You can verify the contents of the generated file:
 
 ```bash
 head -n 40 KAN-4_doc_plan_<timestamp>.md
 ```
-![Markdown file content](./images/markdown.png)
+![Markdown file content](/img/JIRA/markdown.png)
 
 ## Assumptions
 
@@ -391,4 +391,5 @@ This project demonstrates a foundational documentation workflow automation servi
 
 - **Containerization and deployment automation**  
   Package the service using Docker and deploy via CI/CD pipelines.
+
 
