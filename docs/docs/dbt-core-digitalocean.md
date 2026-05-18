@@ -52,7 +52,8 @@ In the DigitalOcean control panel, create a new Droplet with the following setti
 
 Once created, the Droplet overview page confirms the resource is active and shows both a public IPv4 address and a private IP on the `10.x.x.x` range.
 
-![DigitalOcean Droplet overview showing Active status, public IP 104.248.54.189, and private IP 10.116.0.15](./img/dbt/1__DigitalOcean_Droplet.png)
+![DigitalOcean Droplet overview image](./img/dbt DO/1.DigitalOcean Droplet.png)
+![DigitalOcean Droplet overview image](./img/dbt DO/1.DigitalOcean Droplet.png)
 
 The private IP (`10.116.0.15` in this example) is what the database will eventually use to identify and trust this Droplet. Keep this page open — you'll reference it in a later step.
 
