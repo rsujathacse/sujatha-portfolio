@@ -2,6 +2,7 @@
 const sidebars = {
   docsSidebar: [
     'intro',
+    'do-db',
     'vector-search-hybrid',
     'do-articles',
     'prometheus-otel',
