@@ -17,7 +17,7 @@ export default function Home() {
             <h1 className={styles.heroTitle}>I write technical docs that move products from evaluation → adoption → revenue</h1>
 
             <p className={styles.heroKicker}>
-              10+ years crafting complex cloud and AI systems into clear, user-ready docs.
+             Documentation your users trust and AI agents retrieve.
             </p>
 
             <p className={styles.heroBody}>
