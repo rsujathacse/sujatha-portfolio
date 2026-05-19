@@ -48,9 +48,8 @@ Once created, the Droplet overview page confirms the resource is active and show
 
 The private IP (`10.116.0.15` in this example) is what the database will eventually use to identify and trust this Droplet. Keep this page open — you'll reference it in a later step.
 
-:::note Why 512 MB RAM?
-The $4/mo Droplet has 512 MB of RAM, which is tight for Python package installation. You'll add a swap file in Part 2 to give the system headroom during the dbt install. This is intentional — it keeps costs low and documents a real-world constraint that practitioners on budget infrastructure will encounter.
-:::
+**Note:** Why 512 MB RAM?
+The $4/mo Droplet has 512 MB of RAM, which is tight for Python package installation. You'll add a swap file in Part 2 to give the system headroom during the dbt install. It keeps costs low and shows a real-world constraint that developers might encounter on budget.
 
 ### Step 2: Create the Managed PostgreSQL database
 
@@ -75,7 +74,7 @@ Click **Create Database Cluster**. Provisioning takes 2–3 minutes.
 
 Once the database is active, navigate to **Network Access → Add Trusted Sources**. Select your Droplet by name. This restricts inbound database connections to your Droplet's private IP only.
 
-Because both resources share the `default-nyc1` VPC, the connection between them travels over DigitalOcean's internal network rather than the public internet — no public IP or SSL certificate verification is required for the connection itself, though PostgreSQL still enforces credential authentication.
+Because both resources share the `default-nyc1` VPC, the connection between them travels over DigitalOcean's internal network rather than the public internet. No public IP or SSL certificate verification is required for the connection itself, though PostgreSQL still enforces credential authentication.
 
 ### Step 4: Collect your connection details
 
@@ -89,9 +88,8 @@ On the database **Overview** page, click the **VPC network** tab in the Connecti
 | `password` | *(click "show" to reveal)* |
 | `database` | `defaultdb` |
 
-:::caution Use the VPC network hostname, not the public one
+**Note:** Use the VPC network hostname, not the public one
 The connection details panel shows two tabs: **Public network** and **VPC network**. Always use the VPC network hostname when connecting from a Droplet in the same region. The public hostname routes traffic over the internet and counts against your bandwidth.
-:::
 
 ---
 
@@ -108,7 +106,7 @@ free -h
 df -h /
 ```
 
-![Terminal output showing free -h: 458Mi total RAM, 0B swap, and df -h showing 8.7G disk with 6.8G available](./img/dbt/3__memory.png)
+![memory image](/img/dbtdo/3.memory.png)
 
 The output confirms:
 - **RAM:** 458 MB total, ~308 MB available
@@ -137,7 +135,7 @@ What each command does:
 - `swapon` activates it immediately
 - The `echo` line adds an entry to `/etc/fstab` so swap persists across reboots
 
-![Terminal showing swap commands running including mkswap output with UUID](./img/dbt/4__memory_swap.png)
+![mkswap output image](/img/dbtdo/4.memoryswap.png)
 
 Verify swap is active:
 
@@ -145,7 +143,7 @@ Verify swap is active:
 free -h
 ```
 
-![Terminal output showing Swap: 1.0Gi total, 0B used, 1.0Gi free alongside 458Mi RAM](./img/dbt/5__Swap_1_0Gi_total_1_0Gi_free.png)
+![Terminal output showing Swap image](/img/dbtdo/5.swapmemoryfree.png)
 
 The Swap row now shows 1.0 Gi total and 1.0 Gi free. The system has 1.5 GB of addressable memory for the dbt installation.
 
@@ -166,7 +164,7 @@ Verify the Python version:
 python3 --version
 ```
 
-![Terminal output: python3 --version returns Python 3.12.3](./img/dbt/6__python_version.png)
+![Terminal output with python version image](./img/dbtdo/6.pythonversion.png)
 
 Python 3.12.3 is installed. dbt Core 1.12 requires Python 3.8 or higher, so this version is fully compatible.
 
@@ -205,7 +203,7 @@ When complete, the terminal shows a `Successfully installed` line listing every 
 dbt --version
 ```
 
-![Terminal output showing dbt Core installed: 1.12.0-b1, Ahead of latest version, and postgres plugin 1.10.0 Up to date](./img/dbt/7__dbt_version_instllation.png)
+![Terminal output showing dbt Core installed image](/img/dbtdo/7.dbt-version-instllation.png)
 
 The output confirms:
 - **dbt Core:** 1.12.0-b1 (ahead of the stable release — this is the latest beta)
@@ -226,7 +224,7 @@ cd ~
 dbt init jaffle_shop
 ```
 
-`jaffle_shop` is the canonical dbt sample project name, used across the dbt community and official documentation. Using it here makes the project immediately recognizable to any dbt practitioner reviewing your work.
+`jaffle_shop` is the canonical dbt sample project name, used across the dbt community and official documentation.
 
 The `dbt init` command opens an interactive setup prompt. Enter the following values:
 
@@ -244,11 +242,11 @@ schema: jaffle_shop
 threads [1]: 1
 ```
 
-![Terminal showing dbt init jaffle_shop with all configuration inputs including the private VPC hostname, port 25060, user doadmin, dbname defaultdb, schema jaffle_shop, and threads 1](./img/dbt/9__dbt_installation_complete.png)
+![Terminal showing dbt init jaffle_shop with all configuration inputs image](/img/dbtdo/9.dbt-installation-complete.png)
 
 After you enter these values, dbt automatically runs `dbt debug` to validate the connection before creating the project.
 
-![Terminal showing Connection test: OK connection ok, All checks passed, and Your new dbt project jaffle_shop was created](./img/dbt/8__dbt_init.png)
+![Terminal showing Connection test: OK image](/img/dbtdo/8.dbtinit.png)
 
 `All checks passed!` confirms that:
 - dbt can resolve the private VPC hostname
@@ -258,9 +256,8 @@ After you enter these values, dbt automatically runs `dbt debug` to validate the
 
 The project files are written to `/root/jaffle_shop/`.
 
-:::note What profiles.yml does
-During `dbt init`, dbt writes your connection configuration to `/root/.dbt/profiles.yml`. This file maps your project name to a database connection. It lives outside the project directory intentionally — so you can commit your project to version control without exposing database credentials.
-:::
+**Note:** What profiles.yml does?
+During `dbt init`, dbt writes your connection configuration to `/root/.dbt/profiles.yml`. This file maps your project name to a database connection. It lives outside the project directory intentionally, so you can commit your project to version control without exposing database credentials.
 
 ---
 
@@ -275,7 +272,7 @@ cd ~/jaffle_shop
 dbt run
 ```
 
-![Terminal showing dbt run output: Found 2 models, 4 data tests, 467 macros. my_first_dbt_model OK in 0.32s, my_second_dbt_model OK in 0.16s. Completed successfully. PASS=2 WARN=0 ERROR=0 TOTAL=2](./img/dbt/10__dbt_completion_successful.png)
+![Terminal showing dbt run output image](/img/dbtdo/10.dbt-completion-successful.png)
 
 dbt discovers 2 models and runs them in dependency order:
 
@@ -307,7 +304,7 @@ dbt docs serve --host 0.0.0.0 --port 8080
 
 Open a browser and navigate to `http://<your-droplet-public-ip>:8080`.
 
-![dbt docs overview page showing the jaffle_shop project in the left sidebar with Welcome, Navigation, Project Tab, Database Tab, and Graph Exploration sections](./img/dbt/11__dbt_docs_overview.png)
+![dbt docs overview page image](/img/dbtdo/11.dbt-docs-overview.png)
 
 The dbt docs site gives you three views of your project:
 
@@ -321,7 +318,7 @@ The dbt docs site gives you three views of your project:
 
 Click **`my_first_dbt_model`** in the left sidebar.
 
-![my_first_dbt_model detail page showing type table, owner doadmin, relation defaultdb.jaffle_shop.my_first_dbt_model, column id as integer, and Referenced By showing my_second_dbt_model](./img/dbt/12__my_first_dbt_model_table.png)
+![my_first_dbt_model detail page image](/img/dbtdo/12.my-first-dbt-model-table.png)
 
 The model detail page surfaces metadata that would otherwise require querying `information_schema` directly:
 
@@ -332,7 +329,7 @@ The model detail page surfaces metadata that would otherwise require querying `i
 
 Click **`my_second_dbt_model`** to see the downstream model.
 
-![my_second_dbt_model detail page showing type view, data tests unique and not_null, Depends On my_first_dbt_model, and compiled SQL selecting from my_first_dbt_model](./img/dbt/13__my_second_dbt_model.png)
+![my_second_dbt_model detail page image](/img/dbtdo/13.my-second-dbt-model.png)
 
 This page shows the full picture of the model:
 
@@ -345,7 +342,7 @@ This page shows the full picture of the model:
 
 Click the **graph icon** in the bottom-right corner of any page to open the full lineage graph.
 
-![dbt lineage graph showing my_first_dbt_model connected by an arrow to my_second_dbt_model against a teal background, with filter controls at the bottom](./img/dbt/14__dbt_DAG.png)
+![dbt lineage graph image](/img/dbtdo/14.dbt-dag.png)
 
 The DAG shows `my_first_dbt_model` → `my_second_dbt_model`. The arrow represents a `ref()` dependency — dbt guarantees that the upstream model always runs first, regardless of alphabetical or file order.
 
