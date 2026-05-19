@@ -77,7 +77,7 @@ export default function Experience() {
               location="Remote, India"
               dates="Jan 2024 – Present"
               bullets={[
-                "Authored 70+ long-form technical articles; several rank on page 1 for competitive cloud and AI keywords and entering top signup-driven UVEC contributors.",
+                "Authored 100+ long-form technical articles; several rank on page 1 for competitive cloud and AI keywords and entering top signup-driven UVEC contributors.",
                 "Applied cloud and AI/ML concepts to accurately document complex systems with data pipelines, model workflows, platform integrations.",
                 "Worked across cloud and observability fundamentals: metrics, monitoring end-to-end data flows.",
               ]}
