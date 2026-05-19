@@ -1,14 +1,6 @@
----
-id: dbt-core-digitalocean
-title: "From Zero to Pipeline: Running dbt Core on DigitalOcean"
-sidebar_label: dbt Core on DigitalOcean
-description: A complete end-to-end guide to installing dbt Core on a DigitalOcean Droplet, connecting it to a Managed PostgreSQL database, and running your first transformation pipeline.
-tags: [dbt, DigitalOcean, PostgreSQL, analytics engineering, data pipelines]
----
-
 # From Zero to Pipeline: Running dbt Core on DigitalOcean
 
-This guide walks you through building a fully working dbt transformation pipeline on DigitalOcean — from provisioning infrastructure to running your first models and generating documentation. By the end, you'll have dbt Core installed on an Ubuntu Droplet, connected to a Managed PostgreSQL database over a private VPC network, and a live dbt docs site showing your model lineage.
+This guide walks you through building a fully working dbt transformation pipeline on DigitalOcean: from provisioning infrastructure to running your first models. By the end, you'll have dbt Core installed on an Ubuntu Droplet, connected to a Managed PostgreSQL database over a private VPC network, and a live dbt docs site showing your model lineage.
 
 **What you'll build:**
 
@@ -17,7 +9,7 @@ This guide walks you through building a fully working dbt transformation pipelin
 - A `jaffle_shop` dbt project with two models and passing data tests
 - An auto-generated dbt docs site with a lineage graph
 
-**What you'll need:**
+**Prerequisite:**
 
 - A DigitalOcean account
 - Basic familiarity with the Linux command line
@@ -75,7 +67,7 @@ Navigate to **Databases → Create Database Cluster** and configure it as follow
 
 Click **Create Database Cluster**. Provisioning takes 2–3 minutes.
 
-![Managed PostgreSQL database settings showing VPC network default-nyc1, NYC1 region, and $15.15/month total cost](./img/dbt/2__DO_DB.png)
+![Managed PostgreSQL database image](/img/dbtdo/2.dodb.png)
 
 **What provisioning does:** When you click create, DigitalOcean allocates a virtual machine, installs and configures PostgreSQL 18, generates SSL certificates for encrypted connections, formats the SSD storage, and assigns the cluster a private hostname inside your VPC. The database isn't usable until all of these steps complete and the status badge turns green.
 
