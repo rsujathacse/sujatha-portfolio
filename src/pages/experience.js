@@ -64,7 +64,7 @@ export default function Experience() {
             <h1 className={styles.pageTitle}>EXPERIENCE</h1>
 
             <p className={styles.objective}>
-              Accomplished Senior Technical Writer with 10+ years of experience creating clear, concise,
+              Accomplished Senior Technical Writer with proven expertise in creating clear, concise,
               and impactful documentation for technical and non-technical audiences.
             </p>
 
