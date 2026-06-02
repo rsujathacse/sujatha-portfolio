@@ -1,34 +1,34 @@
 # Building a Google Ads AI Help Assistant on DigitalOcean Serverless Inference
 
-## Project Overview
+Google Ads AI Help Assistant is a working AI chat assistant that answers Google Ads questions. It runs on DigitalOcean Serverless Inference using Anthropic Claude Opus 4.6 as the underlying model. The backend is a Node.js server hosted on a DigitalOcean Droplet. The API key stays hidden on the server and is never exposed to the browser. In this project, you will :
 
-This project is a working AI-powered chat assistant that answers Google Ads questions. It runs on DigitalOcean Serverless Inference using Anthropic Claude Opus 4.6 as the underlying model. The backend is a Node.js server hosted on a DigitalOcean Droplet. The API key stays hidden on the server and is never exposed to the browser.
-
-The goal was to demonstrate three things in a single project:
-
-- Prompt engineering and AI instruction design
-- Generative AI guardrails including hallucination mitigation and grounding
-- Content strategy applied to a real product domain (Google Ads)
-
-This is not a mock or simulation. The assistant is live, returns real responses, and enforces topic boundaries through the system prompt.
+- Design and deploy an AI-powered help assistant that answers Google Ads questions.
+- Engineer a system prompt that grounds the model in verified product knowledge.
+- Apply Generative AI guardrails to prevent hallucination and out-of-scope responses.
+- Host a secure Node.js backend on DigitalOcean Serverless Inference with the API key hidden from the browser.
 
 ---
 
-## Why This Project Matters
+## Context and motivation
 
-Google Ads is a self-serve product used by millions of advertisers. It is complex. Users frequently struggle with campaign setup, bidding strategies, conversion tracking, and performance optimization. Traditionally, help content has been static articles. This project explores what an AI-powered knowledge layer looks like for that same problem.
+Google Ads is a self-serve product used by millions of advertisers. Google Ads already has AI built in. Smart Bidding optimizes bids in real time. Performance Max automates campaigns across all Google inventory. The interface has an AI assistant that answers setup and troubleshooting questions. The Help Center uses AI-powered search to surface relevant articles. This project does not replicate what Google has built. It replicates the mechanics behind it. Building this assistant from scratch means making every decision that a production team abstracts away: 
+- What the model is allowed to say
+- What it must refuse
+- How it handles uncertainty
+- How it stays grounded in documented product behavior. 
+Those decisions are prompt engineering.  
 
-From a content strategy perspective, this mirrors exactly what an AI and Knowledge Strategist does: map user intent to content solutions, translate product logic into AI instructions, and ensure the model behaves reliably within the boundaries of documented product knowledge.
+From a content strategy perspective, this maps directly to what an AI and Knowledge Strategist does: 
+- Translate product logic into AI instructions
+- Map user intent to content solutions 
+- Check that the model behaves reliably within the boundaries of verified knowledge.
 
 ---
 
 ## Prerequisites
 
-Before building this project, you need the following.
-
 **Accounts**
 - A DigitalOcean account with billing enabled
-- A GitHub account
 
 **DigitalOcean Resources**
 - A Droplet (Ubuntu 24.04 LTS, 2vCPU / 4GB RAM minimum)
@@ -81,7 +81,7 @@ Log into your DigitalOcean account. Click Create and select Droplets. Use these 
 
 Once created, click the Droplet name and open the Web Console.
 
-`[screenshot: Droplet.png]`
+![DigitalOcean Droplet](/img/googleads/Droplet.png)
 
 ---
 
