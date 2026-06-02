@@ -50,11 +50,11 @@ From a content strategy perspective, this maps directly to what an AI and Knowle
 ## Architecture
 
 ```
-User Browser
+User browser
      |
      | HTTP request (question)
      v
-Node.js Backend (Express) on DigitalOcean Droplet
+Node.js backend (Express) on DigitalOcean Droplet
      |
      | POST /v1/chat/completions
      v
@@ -85,7 +85,7 @@ Once created, click the Droplet name and open the Web Console.
 
 ---
 
-## Step 2: Set Up the Server
+## Step 2: Set up the server
 
 Connect via the Web Console in your browser. Log in as root.
 
@@ -133,7 +133,7 @@ pm2 --version
 
 ---
 
-## Step 3: Create the Project
+## Step 3: Create the project
 
 Create a project folder and initialize it.
 
@@ -155,7 +155,7 @@ npm install express dotenv
 
 ---
 
-## Step 4: Get Your Model Access Key
+## Step 4: Get your Model Access Key
 
 Before writing any code, get your API key from DigitalOcean.
 
@@ -168,7 +168,7 @@ Before writing any code, get your API key from DigitalOcean.
 
 ---
 
-## Step 5: Create the Application Files
+## Step 5: Create the application files
 
 Three files make up the entire application.
 
@@ -224,7 +224,7 @@ app.post('/ask', async (req, res) => {
             role: 'system',
             content: `You are a Google Ads expert assistant. You help advertisers understand and use Google Ads products effectively.
 
-STRICT RULES:
+Strict Rules:
 - Only answer questions about Google Ads products, features, and best practices
 - If asked about anything outside Google Ads, say: "I can only help with Google Ads questions."
 - Never make up features, prices, or policies that you are not certain about
@@ -275,7 +275,7 @@ Paste the full HTML, CSS, and JavaScript for the chat UI. Save the file.
 
 ---
 
-## Step 6: Start the Application
+## Step 6: Start the application
 
 ```bash
 pm2 start server.js --name google-ads-helper
@@ -295,20 +295,20 @@ http://YOUR_DROPLET_IP:3000
 
 ---
 
-## Prompt Engineering: How the system prompt works
+## Prompt engineering: How the system prompt works
 
 The system prompt is the single most important design decision in this project. It does four things.
 
-**1. Defines the role**
+**1. Defines the role**:
 The model is told it is a Google Ads expert assistant. This sets the context for every response. Without a role definition, the model answers general questions without any product-specific grounding.
 
-**2. Enforces topic boundaries**
+**2. Enforces topic boundaries**:
 The rule "If asked about anything outside Google Ads, respond with: I can only help with Google Ads questions" is a hard constraint. It prevents the assistant from drifting into unrelated topics.
 
-**3. Mitigates hallucination**
+**3. Mitigates hallucination**:
 The instruction "Never make up features, prices, or policies that you are not certain about" is the hallucination guardrail. If the model is uncertain, it is instructed to direct the user to Google's official Help Center rather than guess.
 
-**4. Controls temperature**
+**4. Controls temperature**:
 A temperature of 0.3 is used. Lower temperature means more deterministic, factual responses. Higher temperature produces more creative but less reliable output. For a help assistant grounded in product documentation, low temperature is the right choice.
 
 ---
