@@ -1,0 +1,434 @@
+# Building a Google Ads AI Help Assistant on DigitalOcean Serverless Inference
+
+## Project Overview
+
+This project is a working AI-powered chat assistant that answers Google Ads questions. It runs on DigitalOcean Serverless Inference using Anthropic Claude Opus 4.6 as the underlying model. The backend is a Node.js server hosted on a DigitalOcean Droplet. The API key stays hidden on the server and is never exposed to the browser.
+
+The goal was to demonstrate three things in a single project:
+
+- Prompt engineering and AI instruction design
+- Generative AI guardrails including hallucination mitigation and grounding
+- Content strategy applied to a real product domain (Google Ads)
+
+This is not a mock or simulation. The assistant is live, returns real responses, and enforces topic boundaries through the system prompt.
+
+---
+
+## Why This Project Matters
+
+Google Ads is a self-serve product used by millions of advertisers. It is complex. Users frequently struggle with campaign setup, bidding strategies, conversion tracking, and performance optimization. Traditionally, help content has been static articles. This project explores what an AI-powered knowledge layer looks like for that same problem.
+
+From a content strategy perspective, this mirrors exactly what an AI and Knowledge Strategist does: map user intent to content solutions, translate product logic into AI instructions, and ensure the model behaves reliably within the boundaries of documented product knowledge.
+
+---
+
+## Prerequisites
+
+Before building this project, you need the following.
+
+**Accounts**
+- A DigitalOcean account with billing enabled
+- A GitHub account
+
+**DigitalOcean Resources**
+- A Droplet (Ubuntu 24.04 LTS, 2vCPU / 4GB RAM minimum)
+- A Model Access Key from DigitalOcean Inference (AI and ML section in the dashboard)
+
+**Knowledge**
+- No prior backend experience is required. Every command is explained step by step.
+- Basic comfort with copying and pasting terminal commands is enough.
+
+**Tools Used**
+- Node.js v20 (installed on the Droplet)
+- npm (comes with Node.js)
+- PM2 (process manager to keep the app running)
+- Express.js (web server framework)
+- dotenv (loads the API key from a hidden file)
+
+---
+
+## Architecture
+
+```
+User Browser
+     |
+     | HTTP request (question)
+     v
+Node.js Backend (Express) on DigitalOcean Droplet
+     |
+     | POST /v1/chat/completions
+     v
+DigitalOcean Serverless Inference
+     |
+     | Anthropic Claude Opus 4.6
+     v
+Response returned to browser
+```
+
+The browser never sees the API key. All requests from the browser go to the Node.js backend at `/ask`. The backend adds the API key from the `.env` file and forwards the request to DO Inference. The response comes back to the backend and is passed to the browser.
+
+---
+
+## Step 1: Create the Droplet
+
+Log into your DigitalOcean account. Click Create and select Droplets. Use these settings:
+
+- Region: NYC1 (or closest to you)
+- Image: Ubuntu 24.04 LTS x64
+- Size: Basic, Regular, 2vCPU / 4GB RAM
+- Authentication: Password (set a strong root password)
+- Hostname: google-ads-helper
+
+Once created, click the Droplet name and open the Web Console.
+
+`[screenshot: Droplet.png]`
+
+---
+
+## Step 2: Set Up the Server
+
+Connect via the Web Console in your browser. You will see a black terminal screen. Log in as root.
+
+Update the system first. This ensures all packages are current before installing anything new.
+
+```bash
+apt update && apt upgrade -y
+```
+
+After the update completes, reboot to apply the kernel upgrade.
+
+```bash
+reboot
+```
+
+Wait 30 seconds, then refresh the browser and reconnect via Web Console.
+
+### Install Node.js
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
+```
+
+Verify the installation.
+
+```bash
+node --version && npm --version
+```
+
+`[screenshot: 01-node-version.png]`
+
+You should see Node.js v20.x and npm 10.x.
+
+### Install PM2
+
+PM2 is a process manager. It keeps your Node.js app running after you close the terminal. Without it, the app stops the moment the console session ends.
+
+```bash
+npm install -g pm2
+pm2 --version
+```
+
+`[screenshot: 02-pm2-version.png]`
+
+---
+
+## Step 3: Create the Project
+
+Create a project folder and initialize it.
+
+```bash
+mkdir google-ads-helper && cd google-ads-helper
+npm init -y
+```
+
+`npm init -y` creates a `package.json` file with default values. The `-y` flag skips the interactive questions.
+
+Install the two required libraries.
+
+```bash
+npm install express dotenv
+```
+
+- **express**: runs the web server and handles incoming requests
+- **dotenv**: loads environment variables (including the API key) from a `.env` file into the app
+
+---
+
+## Step 4: Get Your Model Access Key
+
+Before writing any code, get your API key from DigitalOcean.
+
+1. Go to cloud.digitalocean.com
+2. Left sidebar: AI and ML > Inference
+3. Click Model Access Keys > Create Key
+4. Name it `google-ads-helper`
+5. Select **No VPC network** (so the Droplet can reach it from the public internet)
+6. Copy the key immediately. You will not see it again after closing the modal.
+
+---
+
+## Step 5: Create the Application Files
+
+Three files make up the entire application.
+
+### File 1: .env
+
+This file stores your secret key. It is never committed to GitHub.
+
+```bash
+nano .env
+```
+
+Add this content:
+
+```
+DO_API_KEY=your_actual_key_here
+PORT=3000
+```
+
+Replace `your_actual_key_here` with the key you copied. Save with `Ctrl+X`, then `Y`, then `Enter`.
+
+### File 2: server.js
+
+This is the backend. It receives questions from the browser, sends them to DO Inference with a carefully designed system prompt, and returns the answer.
+
+```bash
+nano server.js
+```
+
+Paste the following:
+
+```javascript
+require('dotenv').config();
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+app.use(express.static('public'));
+
+app.post('/ask', async (req, res) => {
+  const { question } = req.body;
+
+  try {
+    const response = await fetch('https://inference.do-ai.run/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DO_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'anthropic-claude-opus-4.6',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a Google Ads expert assistant. You help advertisers understand and use Google Ads products effectively.
+
+STRICT RULES:
+- Only answer questions about Google Ads products, features, and best practices
+- If asked about anything outside Google Ads, say: "I can only help with Google Ads questions."
+- Never make up features, prices, or policies that you are not certain about
+- If unsure, say: "I don't have verified information on that. Please check Google's official Help Center at support.google.com/google-ads"
+- Always base answers on real, documented Google Ads behavior
+- Be specific, practical, and cite the relevant Google Ads product when possible`
+          },
+          {
+            role: 'user',
+            content: question
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.3
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.choices && data.choices[0]) {
+      res.json({ answer: data.choices[0].message.content });
+    } else {
+      res.json({ answer: 'Sorry, I could not get a response. Please try again.' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ answer: 'Server error. Please try again.' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Google Ads Helper running on port ${PORT}`);
+});
+```
+
+Save with `Ctrl+X`, `Y`, `Enter`.
+
+### File 3: public/index.html
+
+This is the chat interface the user sees in the browser.
+
+```bash
+mkdir public && nano public/index.html
+```
+
+Paste the full HTML, CSS, and JavaScript for the chat UI. Save the file.
+
+---
+
+## Step 6: Start the Application
+
+```bash
+pm2 start server.js --name google-ads-helper
+```
+
+`[screenshot: 03-app-running-pm2.png]`
+
+The status column should show **online** in green. PM2 will now keep the app running even after the console is closed.
+
+Open a browser and go to:
+
+```
+http://YOUR_DROPLET_IP:3000
+```
+
+`[screenshot: 05-ui-clean.png]`
+
+---
+
+## Prompt Engineering: How the System Prompt Works
+
+The system prompt is the single most important design decision in this project. It does four things.
+
+**1. Defines the role**
+The model is told it is a Google Ads expert assistant. This sets the context for every response. Without a role definition, the model answers general questions without any product-specific grounding.
+
+**2. Enforces topic boundaries**
+The rule "If asked about anything outside Google Ads, respond with: I can only help with Google Ads questions" is a hard constraint. It prevents the assistant from drifting into unrelated topics.
+
+**3. Mitigates hallucination**
+The instruction "Never make up features, prices, or policies that you are not certain about" is the hallucination guardrail. If the model is uncertain, it is instructed to direct the user to Google's official Help Center rather than guess.
+
+**4. Controls temperature**
+A temperature of 0.3 is used. Lower temperature means more deterministic, factual responses. Higher temperature produces more creative but less reliable output. For a help assistant grounded in product documentation, low temperature is the right choice.
+
+---
+
+## Testing the Guardrails
+
+### Test 1: Normal Google Ads Question
+
+Ask: "What is Performance Max and when should I use it?"
+
+The assistant returns a structured answer covering what PMax is, which inventory it accesses, and when it is appropriate to use.
+
+`[screenshot: 06-performance-max-answer.png]`
+
+### Test 2: Step-by-Step Product Task
+
+Ask: "How do I set up conversion tracking in Google Ads?"
+
+The assistant returns a numbered, step-by-step guide grounded in the actual Google Ads interface flow.
+
+`[screenshot: 07-conversion-tracking.png]`
+
+### Test 3: Hallucination Guardrail
+
+Ask: "What is Google Ads' secret internal pricing algorithm?"
+
+The assistant correctly refuses to fabricate proprietary information. It responds: "I don't have access to any secret internal pricing algorithm, and such proprietary details are not publicly documented by Google." It then redirects to what is publicly known.
+
+`[screenshot: 08-hallucination-test.png]`
+
+This is the guardrail working as designed. The model does not invent an answer to satisfy the question.
+
+### Test 4: Out-of-Scope Guardrail
+
+Ask: "What is the weather in Mumbai today?"
+
+The assistant responds: "I can only help with Google Ads questions."
+
+`[screenshot: 09-out-of-scope-test.png]`
+
+The topic boundary holds even for completely unrelated queries.
+
+---
+
+## Infrastructure Notes
+
+The app runs on a DigitalOcean Droplet with 2vCPU and 4GB RAM. The AI inference itself runs on DigitalOcean Serverless Inference, which means there is no GPU to provision or manage. The Droplet only handles the HTTP server logic. All the compute-heavy work happens on DO's managed inference infrastructure.
+
+PM2 keeps the process alive between sessions. To check the app status at any time, run:
+
+```bash
+pm2 list
+pm2 logs google-ads-helper
+```
+
+---
+
+## Key Design Decisions
+
+| Decision | Reasoning |
+|---|---|
+| Temperature set to 0.3 | Prioritizes factual accuracy over creativity |
+| Hard topic boundary in system prompt | Prevents model from answering outside its domain |
+| "Redirect to Help Center" fallback | Gives users a reliable path when the model is uncertain |
+| Node.js backend (not client-side) | Keeps API key hidden from the browser |
+| DigitalOcean Inference over direct Anthropic API | Keeps all infrastructure on one platform |
+| No VPC restriction on model access key | Allows the Droplet to reach the inference endpoint from the public internet |
+
+---
+
+## What This Demonstrates for the AI and Knowledge Strategist Role
+
+This project maps directly to the four responsibilities listed in the Google AI and Knowledge Strategist job description.
+
+**Owning content strategy within a product area**
+The assistant is scoped entirely to Google Ads. Every design decision, from the system prompt to the suggested questions, reflects a deliberate content strategy choice about what the tool should and should not do.
+
+**Translating business requirements into precise AI instructions**
+The system prompt is the AI instruction. It translates the requirement "help advertisers use Google Ads accurately" into specific rules the model follows on every response.
+
+**Monitoring model behavior for grounding and hallucination risks**
+The hallucination test shows the guardrail working. The model refuses to fabricate proprietary information and redirects to verified sources. Temperature 0.3 keeps responses close to documented product behavior.
+
+**Developing multi-format content solutions for user journeys**
+The suggested questions cover the most common advertiser pain points: Smart Bidding, Performance Max, conversion tracking, and Quality Score. These map directly to the top user issues in a Google Ads content strategy context.
+
+---
+
+## Future Scope
+
+This prototype covers the core interaction loop. Several extensions would make it production-ready and more useful for real advertisers.
+
+**Retrieval-Augmented Generation (RAG)**
+Connect the assistant to a knowledge base built from the actual Google Ads Help Center content. Instead of relying on the model's training data, every answer would be grounded in retrieved, up-to-date documentation. This would eliminate the remaining hallucination risk for product-specific facts.
+
+**Conversation memory**
+The current implementation has no memory. Each question is treated as a new conversation. Adding conversation history would let users ask follow-up questions naturally, for example "how do I optimize it?" after asking about a campaign type.
+
+**Structured answer templates**
+Different question types (how-to, conceptual, troubleshooting) could trigger different response templates. A troubleshooting question would return a diagnostic checklist. A how-to question would return numbered steps. This improves consistency and mirrors how a real knowledge base is structured.
+
+**User feedback loop**
+Add a thumbs up or thumbs down button on each response. Collect that feedback to identify which answers are weak, which topics need better coverage, and where the model still drifts outside its guardrails.
+
+**Google Skillshop integration**
+Surface relevant Google Ads certifications and learning resources alongside answers. When a user asks about Performance Max, the assistant could link to the relevant Skillshop module.
+
+**Multi-language support**
+Google Ads is used globally. The system prompt and UI could be extended to support regional advertiser markets in Hindi, Tamil, or other languages.
+
+**Analytics dashboard**
+Track which questions are asked most frequently, which guardrails fire most often, and how response length correlates with user satisfaction. This data would directly inform a content gap analysis for the broader Google Ads knowledge base.
+
+---
+
+## Source Code
+
+The full source code for this project is available on GitHub:
+[github.com/rsujathacse/google-ads-ai-helper](https://github.com/rsujathacse/google-ads-ai-helper)
+
+---
+
+*Built on DigitalOcean Serverless Inference. Anthropic Claude Opus 4.6.*
