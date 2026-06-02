@@ -87,7 +87,7 @@ Once created, click the Droplet name and open the Web Console.
 
 ## Step 2: Set Up the Server
 
-Connect via the Web Console in your browser. You will see a black terminal screen. Log in as root.
+Connect via the Web Console in your browser. Log in as root.
 
 Update the system first. This ensures all packages are current before installing anything new.
 
@@ -116,7 +116,7 @@ Verify the installation.
 node --version && npm --version
 ```
 
-`[screenshot: 01-node-version.png]`
+![Installation verification Node version image](/img/googleads/01-node-version.png)
 
 You should see Node.js v20.x and npm 10.x.
 
@@ -129,7 +129,7 @@ npm install -g pm2
 pm2 --version
 ```
 
-`[screenshot: 02-pm2-version.png]`
+![PM2 version image](/img/googleads/02-pm2-version.png)
 
 ---
 
@@ -281,7 +281,7 @@ Paste the full HTML, CSS, and JavaScript for the chat UI. Save the file.
 pm2 start server.js --name google-ads-helper
 ```
 
-`[screenshot: 03-app-running-pm2.png]`
+![Application started image](/img/googleads/03-app-running-pm2.png)
 
 The status column should show **online** in green. PM2 will now keep the app running even after the console is closed.
 
@@ -291,11 +291,11 @@ Open a browser and go to:
 http://YOUR_DROPLET_IP:3000
 ```
 
-`[screenshot: 05-ui-clean.png]`
+![Google Ads AI helper UI image](/img/googleads/05-ui-clean.png)
 
 ---
 
-## Prompt Engineering: How the System Prompt Works
+## Prompt Engineering: How the system prompt works
 
 The system prompt is the single most important design decision in this project. It does four things.
 
@@ -313,51 +313,52 @@ A temperature of 0.3 is used. Lower temperature means more deterministic, factua
 
 ---
 
-## Testing the Guardrails
+## Testing the [Guardrails](https://www.digitalocean.com/resources/articles/what-are-llm-guardrails)
 
-### Test 1: Normal Google Ads Question
+### Test 1: Normal Google Ads question
 
 Ask: "What is Performance Max and when should I use it?"
 
 The assistant returns a structured answer covering what PMax is, which inventory it accesses, and when it is appropriate to use.
 
-`[screenshot: 06-performance-max-answer.png]`
+![Performance Max image](/img/googleads/06-performance-max-answer.png)
 
-### Test 2: Step-by-Step Product Task
+### Test 2: Step-by-Step product task
 
 Ask: "How do I set up conversion tracking in Google Ads?"
 
 The assistant returns a numbered, step-by-step guide grounded in the actual Google Ads interface flow.
 
-`[screenshot: 07-conversion-tracking.png]`
+![Conversion tracking image](/img/googleads/07-conversion-tracking.png)
 
-### Test 3: Hallucination Guardrail
+### Test 3: Hallucination guardrail
 
 Ask: "What is Google Ads' secret internal pricing algorithm?"
 
 The assistant correctly refuses to fabricate proprietary information. It responds: "I don't have access to any secret internal pricing algorithm, and such proprietary details are not publicly documented by Google." It then redirects to what is publicly known.
 
-`[screenshot: 08-hallucination-test.png]`
+![Hallucination guardrail image](/img/googleads/08-hallucination-test.png)
 
 This is the guardrail working as designed. The model does not invent an answer to satisfy the question.
 
-### Test 4: Out-of-Scope Guardrail
+### Test 4: Out-of-scope guardrail
 
 Ask: "What is the weather in Mumbai today?"
 
 The assistant responds: "I can only help with Google Ads questions."
 
-`[screenshot: 09-out-of-scope-test.png]`
+![Out-of-scope guardrail image](/img/googleads/09-out-of-scope-test.png)`
 
 The topic boundary holds even for completely unrelated queries.
 
 ---
 
-## Infrastructure Notes
+## Infrastructure related pointers to consider
 
-The app runs on a DigitalOcean Droplet with 2vCPU and 4GB RAM. The AI inference itself runs on DigitalOcean Serverless Inference, which means there is no GPU to provision or manage. The Droplet only handles the HTTP server logic. All the compute-heavy work happens on DO's managed inference infrastructure.
-
-PM2 keeps the process alive between sessions. To check the app status at any time, run:
+- The app runs on a DigitalOcean Droplet with 2vCPU and 4GB RAM. 
+- The AI inference  runs on DigitalOcean Serverless Inference, which means there is no GPU to provision or manage. 
+- The Droplet only handles the HTTP server logic. All the compute-heavy work happens on DO's managed inference infrastructure.
+- PM2 keeps the process alive between sessions. To check the app status at any time, run:
 
 ```bash
 pm2 list
@@ -379,52 +380,53 @@ pm2 logs google-ads-helper
 
 ---
 
-## What This Demonstrates for the AI and Knowledge Strategist Role
+## Key takeaways
 
-This project maps directly to the four responsibilities listed in the Google AI and Knowledge Strategist job description.
+### How to scope an AI assistant to a specific product domain
+Scoping is not just a technical decision. Every rule in the system prompt reflects a choice about what the tool is for and what it is not for. This project shows how to translate that into instructions a model actually follows.
 
-**Owning content strategy within a product area**
-The assistant is scoped entirely to Google Ads. Every design decision, from the system prompt to the suggested questions, reflects a deliberate content strategy choice about what the tool should and should not do.
+### How to write AI instructions that produce reliable outputs
+A vague prompt produces vague answers. This project walks through how to write precise instructions that constrain model behavior, set a fallback for uncertainty, and keep responses grounded in documented product knowledge.
 
-**Translating business requirements into precise AI instructions**
-The system prompt is the AI instruction. It translates the requirement "help advertisers use Google Ads accurately" into specific rules the model follows on every response.
+### How to test whether your guardrails actually work
+Writing a guardrail is not enough. You need to test it with questions designed to break it. This project includes four test cases that probe the boundaries of the system prompt and show what happens when the model is pushed outside its scope.
 
-**Monitoring model behavior for grounding and hallucination risks**
-The hallucination test shows the guardrail working. The model refuses to fabricate proprietary information and redirects to verified sources. Temperature 0.3 keeps responses close to documented product behavior.
+### How to connect a frontend to a live AI backend securely
+Most tutorials expose the API key in the browser. This project shows the correct pattern: a Node.js backend that holds the key, accepts questions from the frontend, and returns answers without leaking credentials.
 
-**Developing multi-format content solutions for user journeys**
-The suggested questions cover the most common advertiser pain points: Smart Bidding, Performance Max, conversion tracking, and Quality Score. These map directly to the top user issues in a Google Ads content strategy context.
+### How to keep an AI app running in production
+Deploying is not the same as shipping. This project covers PM2 process management, environment variable handling, and hosting on a real server so the app stays live after the terminal closes.
 
 ---
 
-## Future Scope
+## Future scope
 
 This prototype covers the core interaction loop. Several extensions would make it production-ready and more useful for real advertisers.
 
-**Retrieval-Augmented Generation (RAG)**
+- **[Retrieval-Augmented Generation (RAG)](https://www.digitalocean.com/resources/articles/rag)**
 Connect the assistant to a knowledge base built from the actual Google Ads Help Center content. Instead of relying on the model's training data, every answer would be grounded in retrieved, up-to-date documentation. This would eliminate the remaining hallucination risk for product-specific facts.
 
-**Conversation memory**
+- **Conversation memory**
 The current implementation has no memory. Each question is treated as a new conversation. Adding conversation history would let users ask follow-up questions naturally, for example "how do I optimize it?" after asking about a campaign type.
 
-**Structured answer templates**
+- **Structured answer templates**
 Different question types (how-to, conceptual, troubleshooting) could trigger different response templates. A troubleshooting question would return a diagnostic checklist. A how-to question would return numbered steps. This improves consistency and mirrors how a real knowledge base is structured.
 
-**User feedback loop**
+- **User feedback loop**
 Add a thumbs up or thumbs down button on each response. Collect that feedback to identify which answers are weak, which topics need better coverage, and where the model still drifts outside its guardrails.
 
-**Google Skillshop integration**
+- **Google Skillshop integration**
 Surface relevant Google Ads certifications and learning resources alongside answers. When a user asks about Performance Max, the assistant could link to the relevant Skillshop module.
 
-**Multi-language support**
+- **Multi-language support**
 Google Ads is used globally. The system prompt and UI could be extended to support regional advertiser markets in Hindi, Tamil, or other languages.
 
-**Analytics dashboard**
+- **Analytics dashboard**
 Track which questions are asked most frequently, which guardrails fire most often, and how response length correlates with user satisfaction. This data would directly inform a content gap analysis for the broader Google Ads knowledge base.
 
 ---
 
-## Source Code
+## Source code
 
 The full source code for this project is available on GitHub:
 [github.com/rsujathacse/google-ads-ai-helper](https://github.com/rsujathacse/google-ads-ai-helper)
