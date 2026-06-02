@@ -3,6 +3,7 @@ const sidebars = {
   docsSidebar: [
     'intro',
     'do-dbt',
+    'google-ads-ai-helper',
     'vector-search-hybrid',
     'do-articles',
     'prometheus-otel',
