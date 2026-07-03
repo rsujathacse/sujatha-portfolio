@@ -85,7 +85,7 @@ export default function Talks() {
               rel="noopener noreferrer"
             >
               <img
-                src="/img/talks/rag-basics.png"
+                src="/img/talks/Sujatha R RAG YT thumbnail.png"
                 alt="Learn RAG Basics in less than 5 minutes YouTube thumbnail"
                 style={{
                   width: "100%",
@@ -99,7 +99,7 @@ export default function Talks() {
             <h2 style={{ marginTop: 0 }}>Learn RAG Basics in &lt; 5 mins</h2>
 
             <p style={{ fontWeight: 500 }}>
-              AI/ML Interview Answers
+              AI/ML Conceptual video
               <br />
               Retrieval-Augmented Generation explained simply
             </p>
