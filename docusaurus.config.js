@@ -106,7 +106,7 @@ const config = {
             {to: '/docs/intro', label: 'Docs', position: 'left'},
             {to: '/apis/intro', label: 'APIs', position: 'left'},
             {to: '/experience', label: 'Experience', position: 'left'},
-            {to: '/talks', label: 'My talk(s)', position: 'left'},
+            {to: '/talks', label: 'My talks', position: 'left'},
 ],
       },
 
