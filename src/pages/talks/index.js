@@ -15,7 +15,7 @@ export default function Talks() {
           padding: "32px 16px",
         }}
       >
-        <h1 style={{ marginBottom: "8px" }}>My talk(s)</h1>
+        <h1 style={{ marginBottom: "8px" }}>My talks</h1>
 
         <p style={{ fontSize: "18px", marginBottom: "32px" }}>
           A collection of my talks, presentations, and AI/ML explainers.
@@ -101,7 +101,7 @@ export default function Talks() {
             <p style={{ fontWeight: 500 }}>
               AI/ML Conceptual video
               <br />
-              Retrieval-Augmented Generation explained simply
+        
             </p>
 
             <p>
