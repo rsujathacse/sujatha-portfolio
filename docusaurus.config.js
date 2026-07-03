@@ -102,12 +102,12 @@ const config = {
           src: '/img/sujathar.png',
         },
         items: [
-          {to: '/aiml/intro', label: 'AI/ML Docs', position: 'left'},
-          {to: '/docs/intro', label: 'Docs', position: 'left'},
-          {to: '/apis/intro', label: 'APIs', position: 'left'},
-          {to: '/experience', label: 'Experience', position: 'left'},
-        
-        ],
+            {to: '/aiml/intro', label: 'AI/ML Docs', position: 'left'},
+            {to: '/docs/intro', label: 'Docs', position: 'left'},
+            {to: '/apis/intro', label: 'APIs', position: 'left'},
+            {to: '/experience', label: 'Experience', position: 'left'},
+            {to: '/talks/writing-the-future', label: 'My talk(s)', position: 'left'},
+],
       },
 
 footer: {
@@ -118,7 +118,6 @@ footer: {
         { label: "LinkedIn", href: "https://www.linkedin.com/in/rsujathatech/" },
         { label: "GitHub", href: "https://github.com/rsujathacse" },
         { label: "Email", href: "mailto:rsujathacse@gmail.com" },
-        { label: "My talk(s)", to: "/talks/writing-the-future" },
          { label: `© ${new Date().getFullYear()} Sujatha R`, href: "#" },
       ],
     },
