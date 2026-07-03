@@ -5,7 +5,7 @@ import Link from "@docusaurus/Link";
 export default function Talks() {
   return (
     <Layout
-      title="My talk(s)"
+      title="My talks"
       description="Talks, presentations, cloud, and AI/ML learning videos by Sujatha R."
     >
       <main
