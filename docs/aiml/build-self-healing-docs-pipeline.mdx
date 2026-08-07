@@ -1,0 +1,569 @@
+---
+title: Build a Self-Healing Documentation Pipeline with AI-Assisted Review
+description: Learn how to design, automate, and observe a documentation platform that detects its own drift, proposes fixes automatically, and reports on its own health, using GitHub Actions, a rule-based AI agent, and DigitalOcean.
+---
+
+# Build a Self-Healing Documentation Pipeline with AI-Assisted Review
+
+Documentation drifts. A parameter gets renamed, a model gets deprecated, a link moves, and nobody notices until a developer hits a dead end. Most teams catch this manually, if they catch it at all: someone stumbles on a stale page, files an issue, and waits for a writer to get to it.
+
+That reactive loop doesn't scale once documentation spans multiple products, written by many contributors, on a fast-moving platform. The alternative is to treat documentation like production code: version-controlled, continuously validated, and, where possible, self-correcting.
+
+This article walks through building exactly that: a small documentation platform with automated quality guardrails, an AI-assisted agent that detects and fixes real drift on its own, and an observability layer that reports on how well the whole system is working over time.
+
+### Why this matters beyond a single project
+
+Most guides on documentation automation stop at linting. They check spelling, broken links, or style violations, and call it done. Fewer go further to ask: what happens after a check fails? Who fixes it, and how do you know the fixes are actually happening?
+
+This project treats "AI-assisted documentation" as a systems problem, not a content problem. The goal isn't to have AI write prose. It's to have automation catch drift before a reader does, propose a fix a human can review in seconds, and leave a measurable trail of what got caught and fixed. That distinction, between generating content and maintaining it, is the harder and more valuable problem.
+
+---
+
+## What this article covers
+
+We will:
+
+1. Structure a documentation repository with a defined information architecture and a machine-enforceable style guide
+2. Build four independent CI guardrails: metadata validation, style linting, link checking, and code sample verification
+3. Build a self-healing agent that detects a real documentation drift scenario and opens a pull request with the fix, automatically
+4. Log every pipeline run to a managed database and visualize pass rate, check history, and agent activity on a live dashboard
+5. Deploy that dashboard to the public internet and secure its credentials properly
+
+---
+
+## Environment details
+
+This project was built in the following environment:
+
+- Development environment: GitHub Codespaces
+- CI/CD: GitHub Actions
+- Style linting: Vale 3.17
+- Link checking: markdown-link-check
+- Automation language: Python 3.12
+- Pull request automation: GitHub CLI (`gh`)
+- Metrics store: DigitalOcean Managed PostgreSQL (v18)
+- Dashboard: Flask, deployed on DigitalOcean App Platform
+- Version control: Git, GitHub
+
+---
+
+## Prerequisites
+
+Before starting, you should have:
+
+- A GitHub account with Codespaces access
+- A DigitalOcean account
+- Basic command line familiarity
+- Understanding of:
+  - Git and pull request workflows
+  - YAML syntax (for GitHub Actions)
+  - Basic Python scripting
+- Ability to create and manage GitHub repository secrets
+
+Optional but recommended:
+
+- Familiarity with documentation style guides and editorial standards
+- Basic understanding of CI/CD concepts
+
+---
+
+## Setting up the documentation repository and information architecture
+
+Before automating anything, the documentation needs a defined structure and a set of rules to enforce. Automation without a standard to check against just runs scripts; it doesn't improve quality.
+
+### Structuring the repository
+
+The repository separates content, automation, and presentation:
+
+```
+claude-docs-ai-platform/
+├── docs/
+│   ├── api-reference/
+│   ├── guides/
+│   ├── claude-code/
+│   └── agent-sdk/
+├── .github/workflows/
+├── scripts/
+├── dashboard/
+├── styles/
+├── STYLE_GUIDE.md
+└── README.md
+```
+
+**[Image: terminal output of the `tree` command run at the repo root, showing this folder structure with "8 directories, 4 files" at the bottom. This shows the deliberate separation between content, automation, and the dashboard, before any single file is examined.]**
+
+### Defining the information architecture and style guide
+
+Every documentation page carries required front matter (`title`, `category`, `owner`, `last_reviewed`, `status`). This metadata is what later automation reads to detect staleness and ownership, so it has to exist before anything else is built.
+
+The style guide translates writing principles (active voice, task-oriented headings, current model names only) into rules that can later be enforced by a linter rather than left to a reviewer's judgment call.
+
+![rendered front matter table image](/img/claude/1frontmattertable image.png)
+
+---
+
+## Enforcing documentation quality with automated guardrails
+
+With structure and standards defined, the next step is making them self-enforcing. Four independent checks run on every push: metadata validation, style linting, link checking, and code sample verification.
+
+### Validating required metadata
+
+A Python script walks every Markdown file under `docs/`, checks for the five required front matter fields, and fails if any are missing.
+
+```python
+import frontmatter
+from pathlib import Path
+import sys
+
+REQUIRED_FIELDS = ["title", "category", "owner", "last_reviewed", "status"]
+
+docs = Path("docs")
+errors = []
+
+for md_file in docs.rglob("*.md"):
+    post = frontmatter.load(md_file)
+    missing = [field for field in REQUIRED_FIELDS if field not in post.metadata]
+    if missing:
+        errors.append(f"{md_file}: Missing {', '.join(missing)}")
+
+if errors:
+    print("\nFront Matter Validation Failed\n")
+    for error in errors:
+        print(error)
+    sys.exit(1)
+
+print("✅ All documentation contains required metadata.")
+```
+
+![missing front matter error image](/img/claude/2missingfrontmattererror.png) 
+![correct front matter image](/img/claude/3correctfront mattererror.png)
+
+### Linting writing style with Vale
+
+Vale enforces the style guide's writing principles automatically. Rather than adopting a linting package's full opinionated rule set, only the rules that actually map to the written style guide were kept; stricter rules with no corresponding guideline (like banning the verb "to be" entirely) were explicitly turned off. That scoping decision matters more than the tool choice itself.
+
+`.vale.ini`:
+
+```ini
+StylesPath = styles
+MinAlertLevel = suggestion
+
+Packages = write-good
+
+[*.md]
+BasedOnStyles = Vale, write-good, ClaudeDocs
+write-good.E-Prime = NO
+write-good.Illusions = NO
+write-good.So = NO
+write-good.ThereIs = NO
+```
+
+A custom rule maps directly to the style guide's "avoid unnecessary jargon" principle (`styles/ClaudeDocs/JargonWords.yml`):
+
+```yaml
+extends: existence
+message: "Avoid jargon: '%s'. Use plain, direct language instead."
+level: warning
+ignorecase: true
+tokens:
+  - leverage
+  - utilize
+  - synergy
+  - seamless
+  - robust
+  - cutting-edge
+  - best-in-class
+  - game-changing
+```
+
+### Checking links automatically
+
+`markdown-link-check` walks every Markdown file and verifies that relative and absolute links resolve.
+
+![error markdown link check image](/img/claude/4markdownlinkcheck.png)
+![correct markdown link check image](/img/claude/5markdownlinkcheckpass.png)
+
+### Verifying code samples against current models
+
+A small script parses every fenced Python code block in the docs, checks it for syntax errors, and flags any reference to a deprecated model identifier.
+
+```python
+import ast
+import re
+import sys
+from pathlib import Path
+
+DEPRECATED_MODELS = [
+    "claude-1",
+    "claude-2",
+    "claude-instant-1",
+    "claude-3-sonnet-20240229",
+]
+
+CODE_BLOCK_PATTERN = re.compile(r"```python\n(.*?)```", re.DOTALL)
+
+docs = Path("docs")
+errors = []
+
+for md_file in docs.rglob("*.md"):
+    text = md_file.read_text()
+    blocks = CODE_BLOCK_PATTERN.findall(text)
+
+    for i, block in enumerate(blocks):
+        try:
+            ast.parse(block)
+        except SyntaxError as e:
+            errors.append(f"{md_file} (block {i+1}): Syntax error - {e}")
+
+        for model in DEPRECATED_MODELS:
+            if model in block:
+                errors.append(f"{md_file} (block {i+1}): References deprecated model '{model}'")
+
+if errors:
+    print("\nCode Sample Validation Failed\n")
+    for error in errors:
+        print(error)
+    sys.exit(1)
+
+print("✅ All code samples are syntactically valid and use current models.")
+```
+
+![code samples correct image](/img/claude/6codesamplescorrect.png)
+
+### Wiring every guardrail into one CI pipeline
+
+All four checks run in a single GitHub Actions workflow on every push and pull request.
+
+```yaml
+name: Validate Documentation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml python-frontmatter psycopg2-binary
+
+      - name: Run front matter validation
+        id: frontmatter
+        continue-on-error: true
+        run: python3 scripts/validate_frontmatter.py
+
+      - name: Install Vale
+        run: curl -sfL https://github.com/vale-cli/vale/releases/download/v3.17.0/vale_3.17.0_Linux_64-bit.tar.gz -o vale.tar.gz && tar -xzf vale.tar.gz vale && sudo mv vale /usr/local/bin/
+
+      - name: Run Vale style check
+        id: vale
+        continue-on-error: true
+        run: vale docs/
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Check links
+        id: links
+        continue-on-error: true
+        run: find docs -name "*.md" -exec markdown-link-check {} \;
+
+      - name: Validate code samples
+        id: codesamples
+        continue-on-error: true
+        run: python3 scripts/validate_code_samples.py
+
+      - name: Log metrics to database
+        if: always()
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FRONTMATTER_STATUS: ${{ steps.frontmatter.outcome }}
+          VALE_STATUS: ${{ steps.vale.outcome }}
+          LINKS_STATUS: ${{ steps.links.outcome }}
+          CODESAMPLES_STATUS: ${{ steps.codesamples.outcome }}
+        run: python3 scripts/log_metrics.py
+
+      - name: Fail if any check failed
+        if: steps.frontmatter.outcome == 'failure' || steps.vale.outcome == 'failure' || steps.links.outcome == 'failure' || steps.codesamples.outcome == 'failure'
+        run: |
+          echo "One or more validation checks failed."
+          exit 1
+```
+
+## Building an AI-assisted self-healing agent
+
+Catching problems is only half the job. The more interesting question is what happens after a check fails. This project builds a self-healing agent that detects one well-defined class of drift, deprecated model references in code samples, and repairs it without a human writing the fix.
+
+This agent is deliberately rule-based rather than a live LLM call: it pattern-matches known deprecated model strings and swaps them for the current one. That keeps the loop free to run and fully deterministic to test. A live Claude API call that reasons about arbitrary drift is a natural next iteration, documented below in Future scope, but the automation loop itself (detect, fix, open a PR, merge) is identical either way.
+
+### Simulating real documentation drift
+
+To test the agent honestly, a real deprecated model reference was introduced into a live code sample and pushed to `main`, exactly as it would happen if a model were deprecated and nobody updated the docs.
+
+![depreciated model image](/img/claude/7depreciatedmodel.png)
+
+### Detecting and fixing drift automatically
+
+Running the agent script scans the documentation, finds the deprecated reference, edits the file, creates a new branch, commits, pushes, and opens a pull request, all in one run.
+
+```python
+import re
+import subprocess
+import os
+import psycopg2
+from pathlib import Path
+from datetime import date
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+
+def log_fix(issue, files, pr_url):
+    if not DATABASE_URL:
+        return
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO agent_fixes (issue_detected, files_fixed, pr_url) VALUES (%s, %s, %s)",
+        (issue, ", ".join(files), pr_url),
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+MODEL_REPLACEMENTS = {
+    "claude-1": "claude-sonnet-4-5",
+    "claude-2": "claude-sonnet-4-5",
+    "claude-instant-1": "claude-sonnet-4-5",
+    "claude-3-sonnet-20240229": "claude-sonnet-4-5",
+}
+
+docs = Path("docs")
+fixed_files = []
+
+for md_file in docs.rglob("*.md"):
+    text = md_file.read_text()
+    original = text
+
+    for old_model, new_model in MODEL_REPLACEMENTS.items():
+        if old_model in text:
+            text = text.replace(old_model, new_model)
+
+    if text != original:
+        md_file.write_text(text)
+        fixed_files.append(str(md_file))
+
+if not fixed_files:
+    print("No drift detected. Nothing to fix.")
+else:
+    print(f"Fixed {len(fixed_files)} file(s): {fixed_files}")
+
+    branch_name = f"auto-fix/deprecated-models-{date.today().isoformat()}"
+    subprocess.run(["git", "checkout", "-b", branch_name], check=True)
+    subprocess.run(["git", "add"] + fixed_files, check=True)
+    subprocess.run(["git", "commit", "-m", "AI agent: update deprecated model references"], check=True)
+    subprocess.run(["git", "push", "-u", "origin", branch_name], check=True)
+
+    pr_body = (
+        "This PR was opened automatically by the documentation self-healing agent.\n\n"
+        f"**Detected issue:** one or more code samples referenced a deprecated Claude model.\n\n"
+        f"**Fix applied:** replaced deprecated model identifiers with the current supported model.\n\n"
+        f"**Files changed:** {', '.join(fixed_files)}\n\n"
+        "Please review before merging."
+    )
+    result = subprocess.run([
+        "gh", "pr", "create",
+        "--title", "Auto-fix: update deprecated model references",
+        "--body", pr_body,
+        "--base", "main"
+    ], check=True, capture_output=True, text=True)
+
+    pr_url = result.stdout.strip().splitlines()[-1]
+    print(f"PR created: {pr_url}")
+
+    log_fix(
+        issue="Deprecated Claude model reference in code sample",
+        files=fixed_files,
+        pr_url=pr_url,
+    )
+```
+
+
+### Reviewing the automated pull request
+
+The opened pull request includes a plain-language explanation of what was detected and what was changed, and CI runs against it like any other change.
+
+![auto fix update image](/img/claude/8autofixupdate.png)
+![files changed diff image](/img/claude/9fileschangediff.png)
+
+### Merging the fix
+
+![merged image](/img/claude/10merged.png)
+
+---
+
+## Adding observability into the pipeline
+
+A pipeline that runs silently is hard to trust. The last piece is a metrics layer that records what each check found, and what the agent fixed, so it can be reported on rather than just inferred from Actions logs.
+
+### Storing pipeline metrics in a managed database
+
+A DigitalOcean Managed PostgreSQL cluster holds two tables: one logging every check's pass/fail result per run, and one logging every fix the AI agent makes, including a link back to the pull request.
+
+![DO DB PostgreSQL image](/img/claude/11dodbpostgresql.png)
+
+### Logging every CI run automatically
+
+The workflow now logs each check's outcome to the database as its final step, using `continue-on-error` on each check so that one failing check doesn't prevent the others from being recorded.
+
+```python
+import os
+import sys
+import psycopg2
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+CHECKS = {
+    "frontmatter": os.environ.get("FRONTMATTER_STATUS", "unknown"),
+    "vale": os.environ.get("VALE_STATUS", "unknown"),
+    "links": os.environ.get("LINKS_STATUS", "unknown"),
+    "codesamples": os.environ.get("CODESAMPLES_STATUS", "unknown"),
+}
+
+if not DATABASE_URL:
+    print("No DATABASE_URL set, skipping metrics logging.")
+    sys.exit(0)
+
+conn = psycopg2.connect(DATABASE_URL)
+cur = conn.cursor()
+
+for check_name, status in CHECKS.items():
+    cur.execute(
+        "INSERT INTO ci_runs (check_name, status) VALUES (%s, %s)",
+        (check_name, status),
+    )
+
+conn.commit()
+cur.close()
+conn.close()
+
+print(f"Logged {len(CHECKS)} check results to database.")
+```
+
+![psql query result image](/img/claude/12psqlqueryresult.png)
+
+### Visualizing pass rate and AI agent activity
+
+A small Flask app queries the same database and renders overall pass rate, a time series per check, and a table of every fix the AI agent has made.
+
+```python
+import os
+from flask import Flask, render_template
+import psycopg2
+
+app = Flask(__name__)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+
+def get_data():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("SELECT run_timestamp, check_name, status FROM ci_runs ORDER BY run_timestamp ASC")
+    rows = cur.fetchall()
+
+    cur.execute("SELECT fix_timestamp, issue_detected, files_fixed, pr_url FROM agent_fixes ORDER BY fix_timestamp DESC LIMIT 10")
+    fixes = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return rows, fixes
+
+
+@app.route("/")
+def dashboard():
+    rows, fixes = get_data()
+    total = len(rows)
+    passed = sum(1 for r in rows if r[2] == "success")
+    pass_rate = round((passed / total) * 100, 1) if total else 0
+
+    return render_template(
+        "dashboard.html",
+        total=total,
+        passed=passed,
+        pass_rate=pass_rate,
+        fixes=fixes,
+    )
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
+```
+
+## Deploying the dashboard to DigitalOcean App Platform
+
+The dashboard is only useful if it's reachable without opening a Codespace. The final step deploys it as a standing service.
+
+### Confirming a healthy live deployment
+
+After fixing the dependency file and pushing the code, autodeploy picked up the change and redeployed successfully.
+
+![App Platform overview image](/img/claude/15doapplatform.png)
+
+### Securing database credentials as environment variables
+
+The database connection string is stored as an encrypted app-level environment variable.
+
+![App Platform settings image](/img/claude/16appsettingspage.png)
+
+### Viewing the live dashboard
+
+The live dashboard is accessible at the link: https://octopus-app-kkcbf.ondigitalocean.app (generated by the DigitalOcean App Platform)
+
+![dashboard homepage image](/img/claude/13dashboardhomepage.png)
+
+You can view the merged PR after clicking the "View PR" link
+
+![AI Agent fix image](/img/claude/14recentaiagentfixes.png)
+
+![Merged PR image](img/claude/17mergedpr.png)
+
+
+---
+
+## Full source code
+
+The complete project, including every script, the GitHub Actions workflow, the dashboard app, and the Vale configuration shown above, is available in my GitHub repo: https://github.com/rsujathacse/claude-docs-ai-platform
+
+---
+
+## Future scope
+
+This project stops at a working, observable, self-healing loop for one class of drift. From here, it can be extended in several directions:
+
+- Replace the rule-based agent with a live Claude API call that reasons about arbitrary drift, not just a fixed list of deprecated model strings
+- Expand the guardrail set to cover broken image references, accessibility issues, and duplicate content across pages
+- Add alerting (for example, a Slack or email notification) when the agent opens a pull request, rather than requiring someone to check GitHub
+- Extend metadata-driven staleness detection into the dashboard itself, surfacing pages whose `last_reviewed` date has aged past a threshold
+- Scale the information architecture to cover the full documentation surface rather than a representative subset
+- Add authentication to the dashboard before treating it as anything beyond a portfolio or internal tool
+
+None of these change the core idea: documentation quality holds up better when it is checked automatically, when known classes of drift are fixed automatically, and when the whole system reports honestly on how well it's actually working.
