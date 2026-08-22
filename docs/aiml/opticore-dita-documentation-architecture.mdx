@@ -1,0 +1,345 @@
+---
+title: OptiCore DITA Documentation Architecture
+description: Structured authoring, validation, reuse, and conditional publishing for an optical network controller guide.
+---
+
+# OptiCore DITA Documentation Architecture
+
+Structured authoring, validation, reuse, and conditional publishing for an optical network controller guide.
+
+## Introduction
+
+Optical Transport Network (OTN) configuration documentation carries a specific set of demands: parameter accuracy is safety-relevant, and procedural content is reused across dozens of near-identical interface tasks. The same content set often needs to serve both customer-facing and internal support audiences without maintaining two parallel docsets.
+
+This article walks through a working DITA-based solution to that problem: the OptiCore Network Controller Guide. It covers the baseline topic architecture, the enforcement and reuse mechanisms layered on top of it, and a custom specialization built to give parameter data real semantic structure rather than generic table markup.
+
+## Prerequisites
+
+| Requirement | Detail |
+|---|---|
+| Oxygen XML Editor | Author/Text mode; DITA framework support enabled |
+| DITA-OT (bundled with Oxygen) | Used for all transformation scenarios (XHTML, PDF, WebHelp Responsive) |
+| DITA 1.3 familiarity | Concept, task, and reference topic types; ditamap `topicref`/`keydef` syntax |
+| Schematron familiarity (helpful, not required) | ISO Schematron query binding `xslt2` — pattern/rule/assert structure |
+
+## Baseline architecture
+
+Before layering in enforcement, reuse, or specialization, the project starts from a standard, fully validated DITA structure: one concept topic, one task topic, and one reference topic, assembled through a single ditamap. This section is intentionally brief. It exists to establish the working baseline that every subsequent section builds on, not to re-explain fundamental DITA topic typing.
+
+### Project structure
+
+```text
+opticore/
+  customization/
+  maps/
+  topics/
+    otn-overview.dita              (concept)
+    configure-otn-interface.dita   (task)
+    otn-parameters.dita            (reference)
+  opticore-guide.ditamap
+```
+
+![Oxygen XML Editor project tree for the OptiCore DITA project, with opticore-guide.ditamap selected](/img/opticore/oxygen-project-structure.png)
+
+### Map assembly
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map>
+  <title>OptiCore Network Controller Guide</title>
+  <topicref href="topics/otn-overview.dita"/>
+  <topicref href="topics/configure-otn-interface.dita"/>
+  <topicref href="topics/otn-parameters.dita"/>
+</map>
+```
+
+This baseline validates cleanly and publishes to XHTML, PDF, and WebHelp Responsive without incident — the starting point for every mechanism documented below.
+
+## Schematron constraints for enforcing completeness
+
+DTD/schema validation defines what content is structurally allowed; it does not enforce what content is mandatory in context. A task's `<prereq>` and `<result>` elements are both optional under the base DITA task content model, which means nothing stops an author from omitting either. Schematron closes that gap — a business-rule layer validated alongside, but independent from, the DTD.
+
+### Rule definition
+
+`task-constraints.sch`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" queryBinding="xslt2">
+  <pattern>
+    <rule context="taskbody">
+      <assert test="prereq">Task is missing a &lt;prereq&gt; element.</assert>
+      <assert test="result">Task is missing a &lt;result&gt; element.</assert>
+    </rule>
+  </pattern>
+</schema>
+```
+
+### Attaching the rule to a topic
+
+The Schematron file is bound to a topic via an `xml-model` processing instruction, placed immediately after the XML declaration:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="task-constraints.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+```
+
+The relative `href` resolves against the referencing topic's own location. The `.sch` file must sit alongside the topic it constrains, not merely somewhere in the project.
+
+### Validation in practice
+
+With the result removed from the task, validation surfaces the Schematron assertion directly in the Results panel, distinct from any DTD-level error:
+
+![Oxygen validation message: Task is missing a result element, raised by ISO Schematron from task-constraints.sch](/img/opticore/schematron-missing-result.png)
+
+A Schematron rule's `context` determines which elements it evaluates. A rule with `context="taskbody"` runs against every `taskbody` in every topic that references the schema — including topics with no relevant content. A rule intended to check a specific data value (for example, a parameter's numeric format) must be scoped to that value's actual element context, not bolted onto an unrelated rule block. Otherwise it produces false positives on unrelated topics.
+
+After the required elements are restored, the task includes both a prerequisite and a result:
+
+![configure-otn-interface.dita in Oxygen with prereq, steps, and result present](/img/opticore/configure-otn-interface-source.png)
+
+### Extending constraints to specialized content
+
+Once specialized elements exist (see [Advanced implementation with DITA specialization](#advanced-implementation-with-dita-specialization)), the same layered pattern applies. A second, independently scoped rule enforces completeness on the new vocabulary itself:
+
+```xml
+<rule context="otnparamvalue[../otnparamname = 'Optical Power']">
+  <assert test="matches(., '^-?[0-9]+(\.[0-9]+)?\s?dBm$')">
+    Optical Power must be a number followed by "dBm" (found: <value-of select="."/>)
+  </assert>
+</rule>
+```
+
+## Content reuse using conref and conkeyref
+
+OTN configuration procedures share recurring fragments across topics — a connection prerequisite, a standard completion result. Duplicating that text per topic risks drift the moment one copy is edited without the others. DITA offers two reuse mechanisms, differing in how the reference resolves.
+
+### conref — direct path reference
+
+`common-elements.dita` (source fragment):
+
+```xml
+<reference id="common-elements">
+  <refbody>
+    <section>
+      <p id="otn-connection-prereq">Ensure that the optical node is connected to the Network Controller.</p>
+    </section>
+  </refbody>
+</reference>
+```
+
+`configure-otn-interface.dita` (conref consumer):
+
+```xml
+<prereq>
+  <p conref="common-elements.dita#common-elements/otn-connection-prereq"/>
+</prereq>
+```
+
+### conkeyref — key-indirected reference
+
+`conref` hardcodes the source file's path. If the file is renamed or relocated, every reference to it breaks. `conkeyref` adds a layer of indirection through a `keydef` declared once in the map:
+
+`opticore-guide.ditamap` (keydef):
+
+```xml
+<keydef keys="common-result" href="topics/common-elements.dita"/>
+```
+
+`configure-otn-interface.dita` (conkeyref consumer):
+
+```xml
+<result>
+  <p conkeyref="common-result/otn-config-result"/>
+</result>
+```
+
+Relocating `common-elements.dita` subsequently requires updating one `keydef`, not every referencing topic — the practical justification for defaulting to `conkeyref` over `conref` at any non-trivial scale.
+
+## Conditional publishing with DITAVAL filtering
+
+A single configuration task can contain a step relevant only to internal operations staff (for example, enabling verbose diagnostic logging) that must never reach customer-facing output. Maintaining two separate topics for this is a maintenance liability. DITAVAL filtering publishes two outputs from one source instead.
+
+### Tagging the audience-specific content
+
+```xml
+<steps>
+  <step><cmd>Log in to the Network Controller.</cmd></step>
+  <step><cmd>Select <b>Network &gt; Interfaces</b>.</cmd></step>
+  <step><cmd>Select the OTN interface.</cmd></step>
+  <step><cmd>Set the interface rate to 400G.</cmd></step>
+  <step audience="admin"><cmd>Enable debug logging for the interface (admin only).</cmd></step>
+</steps>
+```
+
+### The filter file
+
+`end-user-filter.ditaval`:
+
+```xml
+<val>
+  <prop att="audience" val="admin" action="exclude"/>
+</val>
+```
+
+The filter's `val` attribute matches the tag already present on the content (`audience="admin"`). The filter targets what is on the element, not the audience the build is intended for. `action="exclude"` removes the matched element from the generated output entirely, at transformation time. It is not hidden via CSS or client-side logic; it is structurally absent from the resulting HTML/PDF.
+
+### Two scenarios, one source
+
+| Scenario | DITAVAL applied | Result |
+|---|---|---|
+| Full/internal build | None | All 5 steps present, including admin-only debug logging |
+| Customer-facing build | `end-user-filter.ditaval` | 4 steps only — admin step structurally excluded |
+
+Customer-facing XHTML output (admin step excluded):
+
+![End-user XHTML output of Configure an OTN Interface with four steps and no admin debug logging](/img/opticore/end-user-xhtml-output.png)
+
+Internal/full XHTML output (admin step included):
+
+![Internal XHTML output of Configure an OTN Interface with five steps, including enable debug logging for the interface](/img/opticore/internal-xhtml-output.png)
+
+### Scenario configuration in Oxygen
+
+The DITAVAL file is attached at the transformation-scenario level (Filters tab of the scenario editor), not at the topic or map level. The same source content can therefore be published through any number of differently filtered scenarios without modification.
+
+![Edit DITA Scenario dialog for XHTML - End User, Filters tab using end-user-filter.ditaval](/img/opticore/ditaval-end-user-scenario.png)
+
+## Advanced implementation with DITA specialization
+
+Every mechanism above reuses or restricts DITA's existing element set. None of them can express a genuinely new domain concept: generic `<entry>` table cells cannot be distinguished as “parameter name” versus “parameter value” structurally, only positionally.
+
+Specialization is the DITA mechanism for introducing new, formally typed elements while remaining valid DITA. An unrecognizing processor gracefully falls back to the specialized element's base type rather than failing.
+
+### The three-layer build
+
+| File | Role |
+|---|---|
+| `otnParamDomain.ent` | Entity declarations: declare the new element names and wire them into DITA's existing extension points (for example, `%ph;`) |
+| `otnParamDomain.mod` | Element/attribute declarations: the actual content models and the class attribute lineage |
+| `reference-otnparam.dtd` | Shell DTD: splices the domain into a complete, working copy of the OASIS `reference.dtd` chain |
+
+### Domain entity declarations
+
+`otnParamDomain.ent`:
+
+```xml
+<!ENTITY % otnparam-d-ph "otnparam | otnparamname | otnparamvalue">
+<!ENTITY otnparam-d-att
+  "otnparam-d-att(otnparam otnparamname otnparamvalue)"
+>
+```
+
+### Domain element declarations
+
+`otnParamDomain.mod`:
+
+```xml
+<!ELEMENT otnparam (#PCDATA | otnparamname | otnparamvalue)*>
+<!ATTLIST otnparam
+  fecmode (Enabled | Disabled) #IMPLIED
+  %univ-atts;
+  outputclass CDATA #IMPLIED
+  class CDATA "- topic/ph otnparam-d/otnparam ">
+<!ELEMENT otnparamname (#PCDATA)*>
+<!ATTLIST otnparamname
+  %univ-atts;
+  outputclass CDATA #IMPLIED
+  class CDATA "- topic/ph otnparam-d/otnparamname ">
+<!ELEMENT otnparamvalue (#PCDATA)*>
+<!ATTLIST otnparamvalue
+  %univ-atts;
+  outputclass CDATA #IMPLIED
+  class CDATA "- topic/ph otnparam-d/otnparamvalue ">
+```
+
+The `class` attribute is the mechanism's core: `"- topic/ph otnparam-d/otnparam "` declares that any processor unaware of `otnparam` should treat it as a plain `topic/ph` phrase — the specialization's graceful-degradation guarantee.
+
+### Splicing the domain into the real OASIS shell
+
+A shell built from scratch, referencing `reference.mod` directly, fails immediately. `reference.mod` assumes a long chain of prerequisite entities (`title`, `shortdesc`, `prolog`, `conref-atts`, and others) already loaded by the authentic OASIS shell. The correct approach copies the real, working `reference.dtd` and splices the domain in at the same points other built-in domains (highlighting, programming, software) already use:
+
+```xml
+<!-- alongside the existing domain entity declarations -->
+<!ENTITY % otnparam-d-dec
+  PUBLIC "-//OPTICORE//ENTITIES OTN Parameter Domain//EN"
+  "otnParamDomain.ent"
+>
+%otnparam-d-dec;
+
+<!-- extending the existing %ph; domain-extension entity -->
+<!ENTITY % ph "ph |
+  %hi-d-ph; | %pr-d-ph; | %sw-d-ph; |
+  %ui-d-ph; | %equation-d-ph; |
+  %otnparam-d-ph;
+">
+
+<!-- appended to the included-domains attribute value -->
+<!ENTITY included-domains
+  "&reference-att; ... &otnparam-d-att;"
+>
+
+<!-- domain module integration, alongside the other *-d-def entities -->
+<!ENTITY % otnparam-d-def
+  SYSTEM "otnParamDomain.mod"
+>
+%otnparam-d-def;
+```
+
+Because the shell's includes use bare relative filenames (`reference.ent`, `topic.mod`, and so on), the shell and its two domain files must reside in the same directory as the authentic OASIS DTD files for those lookups to resolve — not the project's own `topics/` folder. In a production setup this is resolved properly via XML Catalog registration or a packaged DITA-OT plugin. Co-locating with the OASIS files is a valid path for proving the mechanism, not the shipping pattern for a team.
+
+### Applying the specialization to a topic
+
+`otn-parameters.dita` (excerpt):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference SYSTEM "reference-otnparam.dtd">
+<reference id="otn-parameters">
+  <title>OTN Interface Parameters</title>
+  <refbody>
+    <section id="otn-params">
+      <p>
+        <otnparam>
+          <otnparamname>Interface Rate</otnparamname>:
+          <otnparamvalue>400G</otnparamvalue>
+        </otnparam>
+      </p>
+      <!-- existing parameter table retained below -->
+    </section>
+  </refbody>
+</reference>
+```
+
+![otn-parameters.dita in Oxygen using specialized otnparam elements and a Supported OTN Parameters table](/img/opticore/otn-parameters-specialization.png)
+
+The specialized element must sit inside a `<section>`. `refbody` does not permit a bare `<p>` as a direct child. This is a base DITA structural rule, unrelated to the specialization itself.
+
+### Fallback behavior in published output
+
+Publishing the specialized topic through the standard DITA-OT XHTML transformation, with no custom XSLT written for the new domain, confirms the graceful-degradation guarantee directly: the unrecognized `otnparam` / `otnparamname` / `otnparamvalue` elements render as plain inline text, exactly as their declared base type (`ph`) would.
+
+![Published OptiCore Network Controller Guide WebHelp page for OTN Interface Parameters, with the supported parameters table](/img/opticore/webhelp-otn-parameters.png)
+
+### Layering a constraint on top of the specialization
+
+Specialization and Schematron are complementary, sequential layers. Specialization creates a distinguishable vocabulary; Schematron enforces completeness on that vocabulary once it exists.
+
+```xml
+<rule context="otnparam">
+  <assert test="otnparamname">Every otnparam must include an otnparamname.</assert>
+  <assert test="otnparamvalue">Every otnparam must include an otnparamvalue.</assert>
+</rule>
+```
+
+## Summary
+
+| Mechanism | Adds vocabulary? | Operates at | Problem it solves |
+|---|---|---|---|
+| Schematron constraint | No | Validation time | Enforces required content beyond what the DTD requires |
+| conref | No | Authoring / build time | Direct-path content reuse |
+| conkeyref | No | Authoring / build time | Indirected, relocation-safe content reuse |
+| DITAVAL filtering | No | Publish / transform time | Audience-conditional output from one source |
+| Specialization | Yes | Schema / structural level | New, formally typed domain vocabulary |
