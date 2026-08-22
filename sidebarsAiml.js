@@ -5,6 +5,7 @@ const sidebarsAiml = {
     'do-articles',
     'build-retrieval-ready-doc-pipeline',
     'build-self-healing-docs-pipeline',
+    'opticore-dita-documentation-architecture',
   ],
 };
 
