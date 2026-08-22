@@ -4,6 +4,7 @@ const sidebarsAiml = {
     'intro',
     'do-articles',
     'build-retrieval-ready-doc-pipeline',
+    'build-self-healing-docs-pipeline',
   ],
 };
 
