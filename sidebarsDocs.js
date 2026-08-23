@@ -8,6 +8,7 @@ const sidebars = {
     'do-articles',
     'prometheus-otel',
     'full-funnel-technical-content-strategy',
+    'single-source-documentation-architecture-madcap-flare',
   ],
 };
 
