@@ -1,0 +1,236 @@
+---
+title: Single-source documentation architecture in MadCap Flare
+description: A structured authoring case study in MadCap Flare Online for a multi-configuration scanning electron microscope platform.
+---
+
+# Single-source documentation architecture in MadCap Flare
+
+A structured authoring case study built in MadCap Flare Online for a multi-configuration electron microscope platform.
+
+This article walks through the design and build of a single-source documentation architecture for StrataSEM Solutions, a scanning electron microscope (SEM) manufacturer. StrataSEM sells its SX-500 platform in three configurations: Base, Cryo-Upgrade, and Automated. Rather than maintaining three separate manuals, this project builds one structured content set in MadCap Flare that compiles into configuration-specific outputs (WebHelp, PDF, and a print-ready manual) from shared source topics.
+
+The goal is to demonstrate the core structured-authoring skills a senior technical writer or documentation manager is expected to bring to a regulated, multi-configuration hardware product line: information architecture design, single-sourcing with variables, condition-tag governance, content reuse through snippets, and multi-target publishing.
+
+:::caution Disclaimer
+The project was built using the MadCap Flare Online free trial. MadCap's trial output has a documented limitation: compiled output (WebHelp, PDF, and other build targets) displays scrambled or altered text as a restriction of the unlicensed trial period. This scrambling appears only in the final compiled output and does not reflect the actual source content authored in the project, which is accurate and unaltered. Any output screenshots in this document that show garbled text (for example, "Astach" instead of "Attach") are a direct result of this trial limitation, not an error in the source authoring.
+:::
+
+![MadCap Flare Online login page noting that trial-mode output is marked with random characters](/img/flare-sem/flare-trial-login.png)
+
+## About StrataSEM Solutions
+
+StrataSEM Solutions makes electron microscopy instruments for life sciences and materials research labs. Its flagship product, the StrataSEM SX-500, is available in three configurations:
+
+- **Base:** the standard SEM configuration
+- **Cryo-Upgrade:** adds a cryo-transfer stage and liquid nitrogen cooling for frozen biological samples
+- **Automated:** adds a robotic sample-loading arm for unattended, high-throughput imaging
+
+StrataSEM has an established brand identity, including a company logo, a defined color palette, and a tagline ("Single-source. Multi-configuration. Always accurate."), all of which were applied to the documentation output described in this project.
+
+![StrataSEM Solutions brand mark with Cryo, Automated, and Safety ribbons](/img/flare-sem/stratasem-brand.png)
+
+## Prerequisites
+
+Before starting this project, have the following ready:
+
+- A MadCap Flare account
+- Company brand assets: a logo file and defined brand colors, used to theme the documentation output. If the company brand assets are not available, you can proceed with the MadCap Flare templates or choose your custom options.
+- A defined product scope: know the product name, its configurations, and which content is shared versus configuration-specific, before creating any topics
+- A basic understanding of structured authoring concepts (topics, variables, condition tags, snippets, targets) or a willingness to learn them through this walkthrough
+- A web browser
+
+## Project setup
+
+### Creating the project
+
+The project was created through Flare Online's New Project Wizard, using an empty template rather than a prebuilt one, because a real information architecture should be designed deliberately rather than inherited from a default layout.
+
+- **Project name:** SEM-Platform-Docs
+- **Description entered at setup:** Single-source documentation architecture for a multi-configuration scanning electron microscope (SEM) platform. Covers Install, Operation, Maintenance, and Safety content for three product configurations (Base, Cryo-Upgrade, Automated) using shared topics, condition tags, and variables, published to WebHelp, PDF, and print-ready manual outputs.
+
+![New Project Wizard Name step with project name SEM-Platform-Docs](/img/flare-sem/new-project-wizard-name.png)
+
+### Applying brand assets
+
+MadCap Flare's project wizard includes a Branding step, where the StrataSEM logo and brand colors were applied directly to the project template. This ensures that every output generated from this project, whether WebHelp, PDF, or print, carries consistent branding rather than Flare's generic default theme.
+
+Brand details applied:
+
+- **Logo:** StrataSEM Solutions hexagon microscope icon, with three color-coded ribbons representing Cryo (blue), Automated (teal), and Safety (purple)
+- **Primary color:** `#0075ff` (matched to the logo's blue)
+- **Font family:** updated from the default sample font to a cleaner, brand-appropriate sans-serif
+
+![New Project Wizard Branding step with primary color #0075ff and company logo](/img/flare-sem/new-project-wizard-branding.png)
+
+The project summary screen confirms the final configuration before creation, serving as a lightweight project charter.
+
+![New Project Wizard Summary confirming SEM-Platform-Docs, empty template, and customized branding](/img/flare-sem/new-project-wizard-summary.png)
+
+## Information architecture
+
+### Folder structure
+
+Content was organized into numbered folders reflecting the instrument's documentation lifecycle: installation, operation, maintenance, and safety. A numeric prefix was used on each folder to enforce a deliberate reading and build order, rather than relying on alphabetical sorting.
+
+Folders created under Content:
+
+- `01-Install` (`Chamber-Installation`, `Unpacking-and-Site-Prep`)
+- `02-Operation` (`Imaging-Workflow-Overview`)
+- `03-Maintenance` (`Routine-Maintenance-Schedule`)
+- `04-Safety` (`General-Safety-Warnings`)
+- `05-Shared-Snippets` (`Safety-Warning-Standard`)
+
+![Content Explorer showing numbered Install, Operation, Maintenance, Safety, and Shared-Snippets folders](/img/flare-sem/content-folder-structure.png)
+
+This structure was corrected once during the build: a shared-content file was initially created as a standard topic instead of a true Snippet object. The distinction matters, since a snippet is a reusable object referenced across multiple topics, while a topic sitting in a folder named "snippets" is just a regularly authored page with no reuse mechanism behind it. The file was deleted and recreated with the correct file type before continuing.
+
+## Variables: single-sourcing product identity
+
+Where to input this in MadCap Flare: **Add File**, then set **File Type** to Variable Set, saved under `Project/VariableSets`.
+
+A dedicated variable set, `StrataSEM-Variables`, was created to hold product identity values that are inserted into topics rather than typed as literal text. This is what allows a single topic to reference the correct product name or specification without hardcoding it in multiple places.
+
+Variables defined:
+
+| Name | Definition |
+|---|---|
+| `CompanyName` | StrataSEM Solutions |
+| `ProductName` | StrataSEM SX-500 |
+| `ChamberSize` | 250 mm |
+| `ImagingResolution` | 1.2 nm |
+| `ModelNumber` | SX-500-BASE |
+
+These values represent the Base configuration defaults. Configuration-specific differences in chamber size, resolution, and model number are handled through condition-tagged content blocks rather than per-condition variable values, since Flare variables do not natively support different values per condition. Variables are used for values that are true everywhere; condition tags are used for content that changes by configuration.
+
+![StrataSEM-Variables set listing CompanyName, ProductName, ChamberSize, ImagingResolution, and ModelNumber](/img/flare-sem/variables-set.png)
+
+### Inserting a variable into a topic
+
+Place the cursor at the target location, open the Insert Variable dialog, select the correct Variable Set (`StrataSEM-Variables`, not Flare's built-in default set), and choose the variable. The variable then renders as a live, shaded field rather than plain text, and updates automatically anywhere it is used if its definition changes.
+
+## Condition tags: governing configuration-specific content
+
+Move to **Add File**, then set **File Type** to Condition Tag Set, saved under `Project/ConditionTagSets`.
+
+A condition tag set, `StrataSEM-Conditions`, was created to mark which content blocks apply to which product configuration. Flare's default template pre-populates a condition set with output-medium tags (Mobile, PrintOnly, ScreenOnly, Tablet, Web), which were deleted since they do not apply to a hardware configuration scenario.
+
+Tags defined:
+
+- **Base** (gray): standard SX-500 configuration, no upgrades
+- **CryoUpgrade** (blue): SX-500 with cryo-cooling stage upgrade
+- **Automated** (teal): SX-500 with robotic sample-handling upgrade
+- **AllConfigs** (purple): explicitly marks content shared across all three configurations
+
+Each tag includes a short comment documenting its intended use. The AllConfigs tag in particular is a deliberate governance choice: it signals to any future writer that a piece of content is shared on purpose, rather than left untagged by oversight. Tag colors were matched to the corresponding ribbon colors in the StrataSEM logo for visual consistency across the documentation set.
+
+![StrataSEM-Conditions tag set with AllConfigs, Automated, Base, and CryoUpgrade](/img/flare-sem/condition-tags.png)
+
+### Authoring condition-tagged content
+
+Open any topic in the Content Explorer, select a paragraph or content block, and apply a condition tag through the Condition Tag toolbar control.
+
+The Chamber Installation topic demonstrates the full single-sourcing model in one file. It contains four content blocks, each carrying a different condition tag, plus one inserted product variable:
+
+- A shared introductory paragraph (tagged AllConfigs), referencing the ProductName variable
+- A numbered installation procedure for the standard configuration (tagged Base)
+- An additional step for mounting the cryo-transfer stage (tagged CryoUpgrade)
+- An additional step for installing and calibrating the robotic sample-loading arm (tagged Automated), also referencing the ProductName variable
+
+![Chamber Installation topic with AllConfigs, Base, CryoUpgrade, and Automated content blocks](/img/flare-sem/chamber-installation-conditions.png)
+
+## Content reuse through snippets
+
+Navigate to **Add File**, set **File Type** to Snippet, and save under a dedicated folder (`05-Shared-Snippets` in this project). Insert into a topic using the Insert Snippet command.
+
+A standard safety warning was written once, in `Safety-Warning-Standard.flsnp`, and inserted as a linked reference into two separate topics: `Chamber-Installation.htm` and `General-Safety-Warnings.htm`. A snippet reference is visually distinct from typed text in the Flare editor (shown with a light border), confirming it is a single reused object rather than duplicated content.
+
+![Safety-Warning-Standard snippet before the wording change](/img/flare-sem/safety-snippet-before.png)
+
+![Chamber Installation showing the linked safety snippet before the wording change](/img/flare-sem/chamber-snippet-before.png)
+
+### Verifying reuse
+
+To confirm the snippet was a true reference and not a duplicated copy, its wording was changed once, directly in the snippet file, and the change was checked in both topics that reference it.
+
+- **Before:** "may result in serious injury or equipment damage"
+- **After:** "may result in severe injury, permanent equipment failure or equipment damage"
+
+![Safety-Warning-Standard snippet after updating the lockout wording](/img/flare-sem/safety-snippet-after.png)
+
+![Chamber Installation after the snippet wording updated automatically](/img/flare-sem/chamber-snippet-after.png)
+
+The wording updated automatically in both topics, confirming genuine single-source reuse.
+
+![General Safety Warnings topic showing the same updated snippet](/img/flare-sem/general-safety-snippet-reuse.png)
+
+## Building the output target
+
+Navigate to **Add File**, set **File Type** to Target, and save under `Project/Targets`. Configure the Conditional Expression field to control which condition tags are included or excluded in that specific build.
+
+A target named `Base-WebHelp` was created for the standard configuration, with:
+
+- **Output Type:** HTML5 (WebHelp)
+- **Conditional Expression:** include AllConfigs or Base; exclude Automated and CryoUpgrade
+- **TOC (Navigation):** a custom TOC listing all five topics in reading order
+
+The expression is the mechanism that makes single-sourcing functional: at build time, Flare compiles only the content blocks tagged Base or AllConfigs into this specific output, silently excluding the Cryo-Upgrade and Automated content blocks that live in the exact same source topics.
+
+![Conditional Expression dialog including AllConfigs and Base, excluding Automated and CryoUpgrade](/img/flare-sem/conditional-expression.png)
+
+![Base-WebHelp target General settings with HTML5 output and the StrataSEM condition expression](/img/flare-sem/base-webhelp-target.png)
+
+### Table of contents configuration
+
+A custom TOC, `Primary.fltoc`, was built and linked to the target, with all five topics added in their intended reading order: Chamber Installation, Unpacking and Site Prep, Imaging Workflow Overview, Routine Maintenance Schedule, and General Safety Warnings.
+
+![Primary.fltoc listing the five topics in reading order](/img/flare-sem/primary-toc.png)
+
+### Build result
+
+The Base-WebHelp target built successfully with zero errors and one warning in 22 seconds.
+
+![Flare Online build overview for SEM-Platform-Docs Base-WebHelp, complete after 22 seconds with 0 errors and 1 warning](/img/flare-sem/build-result.png)
+
+As noted in the disclaimer, the compiled output text shown in the build screenshots reflects MadCap Flare's trial-mode text scrambling. It does not represent the true, unaltered source content, which was verified directly in the Flare editor throughout the workflow.
+
+![Compiled Base-WebHelp Chamber Installation page with StrataSEM branding. Trial-mode output may scramble displayed text.](/img/flare-sem/webhelp-output.png)
+
+## Summary
+
+- Deliberate information architecture design throughout the product lifecycle management (PDLC)
+- Single-sourcing through variables, separating a value's identity from its rendered content
+- Content governance through a documented condition-tagging scheme with an explicit tag for intentionally shared content
+- True content reuse through snippets, verified through a live-update test
+- Configuration-aware publishing, where one source set compiles into an output tailored to a specific product configuration
+
+## Future scope
+
+The following extensions reflect the kind of ongoing ownership a senior technical writer or documentation manager would take on this project beyond the initial build.
+
+### Multi-target expansion and validation
+
+Build out the two remaining targets (Cryo-Upgrade PDF and Automated print manual) and run a systematic content audit across all three outputs to confirm no configuration-specific content leaks into the wrong build, and that no shared content is accidentally excluded from any target.
+
+### Migration governance for a growing product line
+
+Define a documented process for adding a fourth configuration (for example, a future high-vacuum variant) without restructuring the existing condition tag scheme or breaking existing targets. Include a decision framework for when a new configuration warrants a new condition tag versus a variant of an existing one.
+
+### Review and sign-off workflow
+
+Use Flare's built-in review and commenting features to simulate a real cross-functional sign-off cycle with engineering, product, and safety and compliance stakeholders, with defined turnaround expectations and a documented trail of who approved which content block, particularly for safety-critical snippets.
+
+### Localization readiness
+
+Evaluate the variable and condition tag structure for translation workflows. Single-sourced content with embedded variables and conditions requires additional planning to translate correctly without breaking the reuse model in target languages.
+
+### Style and terminology governance at scale
+
+Build a living style and terminology guide specific to this documentation set (preferred terms for configuration names, units of measurement, safety language conventions). Define an enforcement mechanism: a periodic content audit, as the topic count grows well beyond this initial five-topic set.
+
+### Analytics-informed content maintenance
+
+Once published to a real audience, use WebHelp usage analytics (search terms, most-visited topics, time on page) to identify which configuration's documentation is underperforming or generating support escalations, and prioritize content revisions based on that data rather than on guesswork.
+
+### Onboarding and mentoring plan
+
+Document the structured authoring conventions established in this project (folder naming, condition tag usage, snippet governance) into an onboarding guide for new writers joining the team, so the architecture remains consistent as ownership changes hands.
