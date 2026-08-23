@@ -33,6 +33,18 @@ jobs:
       - name: Build website
         run: npm run build
 
+      - name: Deploy to rsujathacse.github.io
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          repository-name: rsujathacse/rsujathacse.github.io
+          branch: main
+          git-config-name: github-actions[bot]
+          git-config-email: github-actions[bot]@users.noreply.github.com
+          commit-message: Deploy website - based on ${{ github.sha }}
+          clean: true
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
