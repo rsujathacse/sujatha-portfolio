@@ -2,12 +2,12 @@
 const sidebars = {
   docsSidebar: [
     'intro',
+    'single-source-documentation-architecture-madcap-flare',
     'do-dbt',
     'vector-search-hybrid',
     'do-articles',
     'prometheus-otel',
     'full-funnel-technical-content-strategy',
-    'single-source-documentation-architecture-madcap-flare',
   ],
 };
 
