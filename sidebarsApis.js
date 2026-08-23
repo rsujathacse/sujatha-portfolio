@@ -2,9 +2,9 @@
 const sidebars = {
   apisSidebar: [
     'intro',
-        
     'secure-security-event-ingestion-api',
     'building-an-ai-documentation-workflow-agent',
+    'google-ads-ai-helper-casestudy',
 
      
   ],

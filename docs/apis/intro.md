@@ -55,4 +55,26 @@ API tutorials: endpoints, schemas, auth, errors, and examples.
     </a>
   </div>
 
+  {/* Card 3 */}
+  <div style={{ 
+    border: "1px solid #e3e3e3",
+    borderRadius: "12px",
+    padding: "20px",
+    width: "320px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
+  }}>
+    <img 
+      src="/img/googleads/google-ads-ai-assistant-thumbnail.png"
+      alt="Google Ads AI helper built on DO Serverless Inference thumbnail image"
+      style={{ width: "100%", borderRadius: "8px", marginBottom: "12px" }}
+    />
+    <h3>Google Ads AI Help Assistant on DigitalOcean Serverless Inference</h3>
+    <p>
+      Google Ads AI help assistant built on DigitalOcean Serverless Inference. Demonstrates prompt engineering, Generative AI guardrails, and hallucination mitigation using Anthropic Claude Opus 4.6.
+    </p>
+    <a href="/apis/google-ads-ai-helper-casestudy" style={{ color: "#0f62fe", fontWeight: "600" }}>
+      Read article →
+    </a>
+  </div>
+
 </div>
