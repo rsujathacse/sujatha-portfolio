@@ -2,6 +2,7 @@
 const sidebars = {
   docsSidebar: [
     'intro',
+    'helios-hybrid-eda-job-fabric',
     'single-source-documentation-architecture-madcap-flare',
     'do-dbt',
     'vector-search-hybrid',
