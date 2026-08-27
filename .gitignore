@@ -8,6 +8,13 @@
 .docusaurus
 .cache-loader
 
+# Helios local slice state
+helios/.helios/
+helios-out/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+
 # Misc
 .DS_Store
 .env.local

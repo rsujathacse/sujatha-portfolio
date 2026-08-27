@@ -8,7 +8,7 @@ pagination_prev: null
 
 # Helios hybrid EDA job fabric
 
-![Helios hybrid EDA job fabric architecture. Linux CLI, sim-class and pnr-class jobs, farm licenses, on-prem farm and burst compute.](/img/helios-hybrid-eda-job-fabric.jpg)
+![Helios hybrid EDA job fabric architecture. Linux CLI, sim-class and pnr-class jobs, farm licenses, on-prem farm and burst compute.](/img/helios/architecture.jpg)
 
 **Document ID:** HEL-OPS-001  
 **Revision:** 1.1  
@@ -118,6 +118,8 @@ helios whoami
 
 You should see your user, default project, endpoint `farm`, and rev `1.1`.
 
+![Live `helios whoami` output from the 1.1 slice: user designer@farm.helios, default project demo, endpoint farm, rev 1.1.](/img/helios/01-whoami.png)
+
 2. Submit a sim-class job.
 
 ```text
@@ -126,11 +128,15 @@ helios job submit --project demo --class sim --image sim-class:1.1 --pin farm --
 
 Stdout is JSON. Copy `job_id`. `state` should be `succeeded` when seats are free. `placement` should be `farm`. `feature` should be `analog_sim`.
 
+![Successful sim-class submit on project demo, pinned to farm. JSON shows state succeeded, placement farm, feature analog_sim.](/img/helios/02-job-submit.png)
+
 3. Wait until the job is terminal.
 
 ```text
 helios job wait JOB_ID
 ```
+
+![`helios job wait` returns the same terminal job. State remains succeeded when a farm seat was available at submit.](/img/helios/03-job-wait.png)
 
 4. Fetch artifacts.
 
@@ -139,6 +145,10 @@ helios job artifacts JOB_ID --out ./helios-out
 ```
 
 `./helios-out/smoke.log` should exist. The log lists placement, feature, and image.
+
+![Artifact fetch writes `smoke.log` from the farm volume into `./helios-out`.](/img/helios/05-job-artifacts.png)
+
+![`smoke.log` lists placement, feature, and image for the succeeded job.](/img/helios/06-smoke-log.png)
 
 If submit fails with exit 32 or the job stays queued, do not retry in a loop. See the failure catalog.
 
@@ -154,7 +164,11 @@ helios job submit --project PROJECT --class CLASS --image IMAGE --pin PIN --inpu
 
 Classified analog IP (project `analog-ip`) must use `--pin farm`. `--pin burst` on that project exits 34.
 
+![`REGION_PIN` (exit 34) when project analog-ip is submitted with `--pin burst`.](/img/helios/09-region-pin.png)
+
 Optional: `--fail-if-queued` exits 32 if the job cannot start because the feature pool is empty. Use this in CI when queued is a failed build.
+
+![After `helios admin drain-licenses --feature analog_sim`, submit with `--fail-if-queued` exits 32 `LICENSE_EXHAUSTED`.](/img/helios/11-fail-if-queued.png)
 
 ### Get job status
 
@@ -163,6 +177,8 @@ helios job get JOB_ID
 ```
 
 Read `state` and `reason` before you resubmit.
+
+![`helios job get` for a succeeded farm job. Read `state` and `reason` before you resubmit.](/img/helios/04-job-get.png)
 
 ### Get artifacts
 
@@ -181,6 +197,10 @@ helios admin status --verbose
 helios admin licenses
 ```
 
+![Verbose admin status: scheduler healthy, queue depth, per-project data class and quota, farm-volume probe from a farm bastion.](/img/helios/07-admin-status.png)
+
+![Farm license pools: `analog_sim` and `place_route` `in_use` versus `total`. Burst cannot mint these features.](/img/helios/08-admin-licenses.png)
+
 Check scheduler status, queue depth, and feature `in_use` versus `total`. Probe artifact storage from a farm bastion. Do not probe it from a burst node.
 
 ### Injected faults (slice only)
@@ -191,6 +211,10 @@ The local slice can drain seats and mark a job for stale fetch so writers can va
 helios admin drain-licenses --feature analog_sim
 helios admin inject-nfs-stale JOB_ID
 ```
+
+![Slice injector drains `analog_sim` so `in_use` equals `total`.](/img/helios/10-drain-licenses.png)
+
+![Slice injector marks a job stale. Artifact fetch then returns `NFS_STALE` and exit 41.](/img/helios/12-nfs-stale.png)
 
 Do not use inject commands on a production farm. They exist to prove documentation against real exit codes.
 
@@ -211,6 +235,8 @@ API shape (local slice: `python -m helios.api`):
 | `/v1/jobs/{id}/artifacts` | GET | Manifest and fetch |
 
 Error body uses a `code` field. Branch on `code`, not on message text.
+
+![Local API: `python -m helios.api` then `POST /v1/jobs` returns HTTP 201 with the same job JSON as the CLI.](/img/helios/13-api-submit.png)
 
 ## Failure catalog
 
@@ -274,7 +300,7 @@ Writers copy `helios-docs/src/templates/` and follow `helios-docs/CONTRIBUTING.m
 
 | Rev | Change |
 | --- | --- |
-| 1.1 | First published guide. Aligns CLI 1.1, DITA maps, Confluence tree, and Jira DoD. |
+| 1.1 | First published guide. Aligns CLI 1.1, DITA maps, Confluence tree, and Jira DoD. Live CLI and API transcripts captured into `static/img/helios/`. |
 
 ## How this set is sourced
 
