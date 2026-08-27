@@ -1,17 +1,17 @@
 ---
 title: OptiCore DITA Documentation Architecture
-description: Structured authoring, validation, reuse, and conditional publishing for an optical network controller guide.
+description: Structured authoring in DITA and AsciiDoc, validation, reuse, and conditional publishing for an optical network controller guide.
 ---
 
 # OptiCore DITA Documentation Architecture
 
-Structured authoring, validation, reuse, and conditional publishing for an optical network controller guide.
+Structured authoring in DITA and AsciiDoc, validation, reuse, and conditional publishing for an optical network controller guide.
 
 ## Introduction
 
 Optical Transport Network (OTN) configuration documentation carries a specific set of demands: parameter accuracy is safety-relevant, and procedural content is reused across dozens of near-identical interface tasks. The same content set often needs to serve both customer-facing and internal support audiences without maintaining two parallel docsets.
 
-This article walks through a working DITA-based solution to that problem: the OptiCore Network Controller Guide. It covers the baseline topic architecture, the enforcement and reuse mechanisms layered on top of it, and a custom specialization built to give parameter data real semantic structure rather than generic table markup.
+This article walks through a working solution to that problem: the OptiCore Network Controller Guide. The canonical source is DITA in Oxygen XML Editor. The same guide is also maintained as AsciiDoc so web-based publications can build from Markup (AsciiDoc/XML) and Markdown-adjacent Git workflows without a second product story. It covers the baseline topic architecture, the enforcement and reuse mechanisms layered on top of it, AsciiDoc equivalents for attributes, includes, and conditional publishing, and a custom DITA specialization built to give parameter data real semantic structure rather than generic table markup.
 
 ## Prerequisites
 
@@ -19,7 +19,9 @@ This article walks through a working DITA-based solution to that problem: the Op
 |---|---|
 | Oxygen XML Editor | Author/Text mode; DITA framework support enabled |
 | DITA-OT (bundled with Oxygen) | Used for all transformation scenarios (XHTML, PDF, WebHelp Responsive) |
+| Asciidoctor | Used to publish the AsciiDoc companion source to HTML and PDF |
 | DITA 1.3 familiarity | Concept, task, and reference topic types; ditamap `topicref`/`keydef` syntax |
+| AsciiDoc familiarity | Attributes, `include::`, `ifdef`/`ifndef`, and procedure markup |
 | Schematron familiarity (helpful, not required) | ISO Schematron query binding `xslt2` — pattern/rule/assert structure |
 
 ## Baseline architecture
@@ -36,6 +38,13 @@ opticore/
     otn-overview.dita              (concept)
     configure-otn-interface.dita   (task)
     otn-parameters.dita            (reference)
+  asciidoc/
+    opticore-guide.adoc            (master)
+    modules/
+      otn-overview.adoc            (concept)
+      configure-otn-interface.adoc (task)
+      otn-parameters.adoc          (reference)
+      _common.adoc                 (reusable fragments)
   opticore-guide.ditamap
 ```
 
@@ -207,6 +216,115 @@ The DITAVAL file is attached at the transformation-scenario level (Filters tab o
 
 ![Edit DITA Scenario dialog for XHTML - End User, Filters tab using end-user-filter.ditaval](/img/opticore/ditaval-end-user-scenario.png)
 
+## AsciiDoc companion source
+
+DITA remains the structured source of record in Oxygen. AsciiDoc is the parallel markup used when the same OTN guide must ship as a Git-native, web-based publication. The mapping is one-to-one with the DITA mechanisms already in the project: document attributes stand in for variables, `include::` stands in for `conref`/`conkeyref`, and `ifdef`/`ifndef` stands in for DITAVAL audience filtering.
+
+### Master assembly
+
+`asciidoc/opticore-guide.adoc`:
+
+```asciidoc
+= OptiCore Network Controller Guide
+:doctype: book
+:toc: left
+:sectnums:
+:source-highlighter: rouge
+:interface-rate: 400G
+:imagesdir: images
+ifndef::audience[]
+:audience: end-user
+endif::[]
+
+include::modules/otn-overview.adoc[]
+include::modules/configure-otn-interface.adoc[]
+include::modules/otn-parameters.adoc[]
+```
+
+`:interface-rate:` is a single-source attribute. Changing `400G` here updates every topic that references `{interface-rate}` — the AsciiDoc equivalent of a DITA variable set.
+
+### Reusable fragments
+
+`asciidoc/modules/_common.adoc`:
+
+```asciidoc
+// tag::otn-connection-prereq[]
+Ensure that the optical node is connected to the Network Controller.
+// end::otn-connection-prereq[]
+
+// tag::otn-config-result[]
+The OTN interface is configured at {interface-rate} and is ready for traffic.
+// end::otn-config-result[]
+```
+
+Tagged regions let one file hold shared prerequisite and result text. Consumers pull a named tag rather than copying the sentence.
+
+### Task topic with include and audience conditions
+
+`asciidoc/modules/configure-otn-interface.adoc`:
+
+```asciidoc
+== Configure an OTN interface
+
+Configure the OTN interface on the Network Controller and set the interface rate.
+
+.Prerequisites
+include::_common.adoc[tag=otn-connection-prereq]
+
+.Procedure
+. Log in to the Network Controller.
+. Select *Network > Interfaces*.
+. Select the OTN interface.
+. Set the interface rate to {interface-rate}.
+ifdef::audience-admin[]
+. Enable debug logging for the interface (admin only).
+endif::[]
+
+.Result
+include::_common.adoc[tag=otn-config-result]
+```
+
+The tagged `include::` is the AsciiDoc form of `conkeyref`. The `ifdef::audience-admin[]` step is the AsciiDoc form of `<step audience="admin">`. Two Asciidoctor builds from the same source:
+
+| Build | Attribute | Result |
+|---|---|---|
+| Customer-facing HTML/PDF | default (`audience=end-user`) | Four steps; admin debug logging omitted |
+| Internal HTML/PDF | `-a audience-admin` | Five steps, including enable debug logging |
+
+```bash
+asciidoctor -a audience=end-user asciidoc/opticore-guide.adoc
+asciidoctor-pdf -a audience-admin asciidoc/opticore-guide.adoc
+```
+
+### Reference topic
+
+`asciidoc/modules/otn-parameters.adoc`:
+
+```asciidoc
+== OTN interface parameters
+
+Supported parameters for the OTN interface on the Network Controller.
+
+[cols="2,2,3", options="header"]
+|===
+| Parameter | Value | Description
+
+| Interface Rate
+| {interface-rate}
+| Line rate applied during configuration.
+
+| Optical Power
+| -2.5 dBm
+| Measured launch power. Must be a number followed by `dBm`.
+
+| FEC mode
+| Enabled
+| Forward error correction on the OTN interface.
+|===
+```
+
+AsciiDoc does not add a specialized element type the way DITA `otnparam` does. Parameter names and values stay in a table, with `{interface-rate}` still resolving from the master document. Completeness rules (required name and value, Optical Power format) stay in the DITA Schematron layer; AsciiDoc is the publishing markup, not the constraint language.
+
 ## Advanced implementation with DITA specialization
 
 Every mechanism above reuses or restricts DITA's existing element set. None of them can express a genuinely new domain concept: generic `<entry>` table cells cannot be distinguished as “parameter name” versus “parameter value” structurally, only positionally.
@@ -342,4 +460,5 @@ Specialization and Schematron are complementary, sequential layers. Specializati
 | conref | No | Authoring / build time | Direct-path content reuse |
 | conkeyref | No | Authoring / build time | Indirected, relocation-safe content reuse |
 | DITAVAL filtering | No | Publish / transform time | Audience-conditional output from one source |
+| AsciiDoc attributes, includes, and `ifdef` | No | Authoring / build time | Git-native Markup equivalent of variables, reuse, and audience filtering |
 | Specialization | Yes | Schema / structural level | New, formally typed domain vocabulary |
