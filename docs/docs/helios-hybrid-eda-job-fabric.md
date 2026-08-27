@@ -8,8 +8,6 @@ pagination_prev: null
 
 # Helios hybrid EDA job fabric
 
-![Helios hybrid EDA job fabric architecture. Linux CLI, sim-class and pnr-class jobs, farm licenses, on-prem farm and burst compute.](/img/helios/architecture.jpg)
-
 **Document ID:** HEL-OPS-001  
 **Revision:** 1.1  
 **Audience:** Design engineers, platform SRE, tool integrators, documentation reviewers  
