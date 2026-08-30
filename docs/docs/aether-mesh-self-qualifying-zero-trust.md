@@ -32,8 +32,9 @@ The mesh is default-deny. Hubble-style JSONL carries intent (`FORWARDED` or `DRO
 Documentation for this slice uses the Isovalent JD toolchain:
 
 - **Git** revision management (`aether-mesh/` in this repository).
-- **Markdown** tutorials (Hugo content tree).
-- **reStructuredText** CLI, policy, and error catalog (Sphinx, Read the Docs analog).
+- **Markdown** tutorials built with **Hugo** (`aether-mesh/docs/hugo`, `hugo --minify`).
+- **reStructuredText** CLI, policy, and error catalog built with **Sphinx** and the **Read the Docs** theme.
+- **Read the Docs** project config at repo root: `.readthedocs.yaml`.
 - **UNIX CLI** and HTTP API with one meaning per error code.
 
 ## Prerequisites
@@ -180,19 +181,37 @@ CLI, API, Sphinx `errors.rst`, and this table share one meaning per code.
 
 ## Documentation system
 
-| Surface | Format | Tree |
+| Surface | Format | How it is built |
 | --- | --- | --- |
-| Operator tutorial | Hugo + Markdown | `aether-mesh/docs/hugo/content/` |
-| CLI / CRD / errors | Sphinx + reST | `aether-mesh/docs/sphinx/` (`sphinx-build -b html`) |
+| Operator tutorial | Hugo + Markdown | `cd aether-mesh/docs/hugo && hugo --minify -d public` |
+| CLI / CRD / errors | Sphinx + reST + RTD theme | `sphinx-build -W -b html docs/sphinx docs/sphinx/_build/html` |
+| Read the Docs | `.readthedocs.yaml` | Sphinx config `aether-mesh/docs/sphinx/conf.py` |
 | This portfolio guide | Docusaurus Markdown | `docs/docs/aether-mesh-self-qualifying-zero-trust.md` |
 | Product slice | Python CLI/API | `aether-mesh/aether/` |
 
-Task topics stay in draft until a writer pastes a local transcript (the screenshots above were captured by `aether-mesh/scripts/render_docs_screenshots.py` against a live CLI).
-
 ```text
+# Hugo (task docs)
+cd aether-mesh/docs/hugo
+hugo version
+hugo --minify -d public
+
+# Sphinx / Read the Docs theme (reference)
 cd aether-mesh
-python3 -m sphinx -b html docs/sphinx docs/sphinx/_build/html
+pip install -r docs/sphinx/requirements.txt
+python3 -m sphinx -W -b html docs/sphinx docs/sphinx/_build/html
 ```
+
+![Live `hugo --minify -d public` on Hugo 0.134.3 extended: 5 pages in 9 ms.](/img/aether-mesh/hugo-build.png)
+
+![Hugo operator home, served from `public/` at `/aether-mesh/`.](/img/aether-mesh/hugo-home.png)
+
+![Hugo task topic: qualify ClusterMesh policy on the shadow dataplane.](/img/aether-mesh/hugo-qualify-policy.png)
+
+![Sphinx HTML with the Read the Docs theme (what `.readthedocs.yaml` builds).](/img/aether-mesh/rtd-sphinx-home.png)
+
+![Error catalog on the RTD theme: one meaning per code for CLI, API, and reference.](/img/aether-mesh/rtd-sphinx-errors.png)
+
+Chrome captured those HTML pages from local HTTP servers after the Hugo and Sphinx builds. Task topics stay in draft until a writer pastes a local CLI transcript (`scripts/render_docs_screenshots.py`). Page captures: `scripts/capture_docs_sites.py`.
 
 ## Future scope
 
@@ -207,3 +226,4 @@ python3 -m sphinx -b html docs/sphinx docs/sphinx/_build/html
 | Rev | Change |
 | --- | --- |
 | 1.0 | First published guide. Aligns CLI 1.0, Hugo tutorials, Sphinx reference, and live transcripts in `static/img/aether-mesh/`. |
+| 1.1 | `.readthedocs.yaml`, sphinx-rtd-theme, real `hugo --minify` site, Chrome captures of Hugo and RTD-themed Sphinx HTML. |

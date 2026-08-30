@@ -1,4 +1,13 @@
-baseURL: "https://example.local/aether/"
-languageCode: en-us
-title: Aether Mesh operator docs
-contentDir: content
+baseURL = 'https://rsujathacse.github.io/aether-mesh/'
+languageCode = 'en-us'
+title = 'Aether Mesh operator docs'
+contentDir = 'content'
+publishDir = 'public'
+enableGitInfo = false
+disableKinds = ['taxonomy', 'term', 'RSS']
+relativeURLs = false
+
+[params]
+  product = 'Aether Mesh'
+  rev = '1.0'
+  stack = 'Hugo + Markdown · Sphinx + reST on Read the Docs · Git'

@@ -16,6 +16,8 @@ helios-out/
 aether-mesh/.aether/
 aether-mesh/.aether-docs/
 aether-mesh/docs/sphinx/_build/
+aether-mesh/docs/hugo/public/
+aether-mesh/docs/hugo/resources/
 **/__pycache__/
 *.py[cod]
 *.egg-info/
