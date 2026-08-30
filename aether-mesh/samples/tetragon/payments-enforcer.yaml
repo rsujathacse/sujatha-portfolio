@@ -1,0 +1,39 @@
+apiVersion: aether.mesh/v1
+kind: TracingPolicy
+metadata:
+  name: payments-runtime
+spec:
+  kprobes:
+    - call: tcp_connect
+      selectors:
+        - matchBinaries:
+            - operator: In
+              values:
+                - /bin/sh
+                - /bin/bash
+                - /usr/bin/curl
+          matchPodLabels:
+            app: payments
+          matchActions:
+            - action: Sigkill
+    - call: process_exec
+      selectors:
+        - matchBinaries:
+            - operator: In
+              values:
+                - /bin/sh
+                - /bin/bash
+          matchPodLabels:
+            app: payments
+          matchActions:
+            - action: Sigkill
+    - call: file_open
+      selectors:
+        - matchBinaries:
+            - operator: In
+              values:
+                - /usr/local/bin/webapp
+          matchPodLabels:
+            app: payments
+          matchActions:
+            - action: Deny

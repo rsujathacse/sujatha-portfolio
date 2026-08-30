@@ -1,0 +1,22 @@
+apiVersion: aether.mesh/v1
+kind: NetworkPolicy
+metadata:
+  name: checkout-to-payments
+  cluster: prod-eu
+spec:
+  endpointSelector:
+    matchLabels:
+      app: payments
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: checkout
+            cluster: prod-us
+      toPorts:
+        - ports:
+            - port: "8443"
+              protocol: TCP
+          rules:
+            http:
+              - method: POST
+                path: "/v1/charge"

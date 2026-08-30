@@ -1,0 +1,4 @@
+baseURL: "https://example.local/aether/"
+languageCode: en-us
+title: Aether Mesh operator docs
+contentDir: content

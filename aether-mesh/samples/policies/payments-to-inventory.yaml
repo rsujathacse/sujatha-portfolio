@@ -1,0 +1,22 @@
+apiVersion: aether.mesh/v1
+kind: NetworkPolicy
+metadata:
+  name: payments-to-inventory
+  cluster: prod-ap
+spec:
+  endpointSelector:
+    matchLabels:
+      app: inventory
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: payments
+            cluster: prod-eu
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: "/sku.*"
