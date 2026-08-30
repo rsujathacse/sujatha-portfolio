@@ -18,6 +18,7 @@ aether-mesh/.aether-docs/
 aether-mesh/docs/sphinx/_build/
 aether-mesh/docs/hugo/public/
 aether-mesh/docs/hugo/resources/
+aether-mesh/docs/hugo/.hugo_build.lock
 **/__pycache__/
 *.py[cod]
 *.egg-info/
