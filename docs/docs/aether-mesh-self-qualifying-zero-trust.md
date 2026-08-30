@@ -21,6 +21,8 @@ This guide is the human entry point for Aether Mesh, a **runnable analog** of Ci
 
 Aether Mesh is **not** Cilium, **not** Isovalent Enterprise, and **not** Hypershield. It exists so enterprise documentation for that domain has a control plane with real exit codes, drop reasons, and transcripts.
 
+A **kind** cluster was also brought up in this Cloud Agent so `kubectl` is not theoretical. Cilium 1.16.6 was installed. The agent could not start a datapath here (no VXLAN module, no ipset). **Hubble was not faked.** See [kind lab](#kind--cilium-one-cluster-lab).
+
 ![Aether Mesh architecture: three ClusterMesh clusters, shadow dataplane, enforce plus Tetragon.](/img/aether-mesh/architecture.jpg)
 
 ## Introduction
@@ -36,6 +38,31 @@ Documentation for this slice uses the Isovalent JD toolchain:
 - **reStructuredText** CLI, policy, and error catalog built with **Sphinx** and the **Read the Docs** theme.
 - **Read the Docs** project config at repo root: `.readthedocs.yaml`.
 - **UNIX CLI** and HTTP API with one meaning per error code.
+- **kind + kubectl + Cilium CLI** on one cluster (agent datapath blocked in this nested VM; Hubble not invented).
+
+## kind + Cilium (one cluster) lab
+
+You do not need to run this on a laptop. The Cloud Agent created `kind-aether` (Kubernetes **v1.32.2**). Commands below are the **captured** session.
+
+```text
+kind create cluster --config aether-mesh/kind/kind-aether.yaml
+kubectl get nodes -o wide
+cilium install --version 1.16.6 --set operator.replicas=1
+cilium status
+kubectl -n kube-system logs -l k8s-app=cilium
+```
+
+![Real `kubectl get nodes -o wide` on kind-aether: control-plane Ready, containerd, kernel 6.12.94+.](/img/aether-mesh/kind-kubectl-nodes.png)
+
+![Real `kubectl get pods -A`: etcd/apiserver/scheduler Running; Cilium agent CrashLoopBackOff; CoreDNS Pending on CNI.](/img/aether-mesh/kind-kubectl-pods.png)
+
+![Real `cilium status`: Helm 1.16.6, Hubble Relay disabled, agent not ready.](/img/aether-mesh/kind-cilium-status.png)
+
+![Real cilium-agent fatal: ipset / iptables modules unavailable in this nested kernel (earlier: VXLAN operation not supported).](/img/aether-mesh/kind-cilium-agent-fatal.png)
+
+Hubble observe was **not** run against empty or fabricated flows. On a host with VXLAN and iptables (a normal Linux VM), the same `kind-aether.yaml` plus `cilium hubble enable` is the next step. Until then, golden JSONL replay in `aether flow replay` is the documented Hubble analog.
+
+Raw transcripts: `aether-mesh/kind/transcripts/`.
 
 ## Prerequisites
 
@@ -226,4 +253,4 @@ Chrome captured those HTML pages from local HTTP servers after the Hugo and Sphi
 | Rev | Change |
 | --- | --- |
 | 1.0 | First published guide. Aligns CLI 1.0, Hugo tutorials, Sphinx reference, and live transcripts in `static/img/aether-mesh/`. |
-| 1.1 | `.readthedocs.yaml`, sphinx-rtd-theme, real `hugo --minify` site, Chrome captures of Hugo and RTD-themed Sphinx HTML. |
+| 1.2 | kind-aether lab: real kubectl nodes/pods, Cilium 1.16.6 install, agent CrashLoop transcripts. Hubble not faked. |

@@ -38,4 +38,5 @@ Docs:
 - Read the Docs config (repo root): `.readthedocs.yaml`
 - Portfolio article: `docs/docs/aether-mesh-self-qualifying-zero-trust.md` in the site root
 - Chrome page captures: `python3 scripts/capture_docs_sites.py`
+- kind + Cilium lab transcripts: `kind/transcripts/` (real kubectl; Hubble not faked)
 

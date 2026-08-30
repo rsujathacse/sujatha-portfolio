@@ -1,0 +1,13 @@
+NAMESPACE            NAME                                           READY   STATUS             RESTARTS      AGE
+kube-system          cilium-envoy-5dcpd                             0/1     Terminating        0             90s
+kube-system          cilium-operator-6db4759c84-pg7vl               0/1     Terminating        0             92s
+kube-system          cilium-operator-7bfcff947c-vxhhh               0/1     Pending            0             79s
+kube-system          cilium-zp9p8                                   0/1     CrashLoopBackOff   1 (13s ago)   30s
+kube-system          coredns-668d6bf9bc-ncfzb                       0/1     Pending            0             16m
+kube-system          coredns-668d6bf9bc-q7wd5                       0/1     Pending            0             16m
+kube-system          etcd-aether-control-plane                      1/1     Running            0             16m
+kube-system          kube-apiserver-aether-control-plane            1/1     Running            0             16m
+kube-system          kube-controller-manager-aether-control-plane   1/1     Running            0             16m
+kube-system          kube-proxy-lnmnp                               1/1     Running            0             16m
+kube-system          kube-scheduler-aether-control-plane            1/1     Running            0             16m
+local-path-storage   local-path-provisioner-7dc846544d-qgpzg        0/1     Pending            0             16m
