@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} · {{ .Site.Title }}{{ end }}</title>
+  <style>
+    :root { --ink:#0b1220; --muted:#5b6b7c; --line:#d7dee8; --accent:#0b5cab; --bg:#f6f8fb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font: 16px/1.55 "IBM Plex Sans", "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+    header { background:var(--ink); color:#fff; padding:16px 28px; display:flex; gap:24px; align-items:baseline; }
+    header a { color:#9ec5ff; text-decoration:none; }
+    header strong { color:#fff; font-size:18px; margin-right:12px; }
+    .wrap { display:grid; grid-template-columns: 240px 1fr; max-width:1100px; margin:0 auto; }
+    nav { padding:28px 20px; border-right:1px solid var(--line); background:#fff; min-height: calc(100vh - 58px); }
+    nav a { display:block; color:var(--accent); text-decoration:none; margin:0 0 10px; }
+    nav p { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    main { padding:32px 40px 64px; background:#fff; }
+    h1 { font-size:28px; margin:0 0 12px; }
+    h2 { font-size:20px; margin:28px 0 8px; }
+    code, pre { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size:13px; }
+    pre { background:#0b1220; color:#e6edf3; padding:14px 16px; overflow:auto; border-radius:8px; }
+    ol { padding-left: 1.2em; }
+    .meta { color:var(--muted); font-size:14px; margin-bottom:24px; }
+    footer { grid-column: 1 / -1; padding:16px 28px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>{{ .Site.Params.product }}</strong>
+    <a href="{{ "/" | relURL }}">Operator docs</a>
+    <span class="meta" style="color:#9aa7b5;margin-left:auto">rev {{ .Site.Params.rev }} · Hugo</span>
+  </header>
+  <div class="wrap">
+    <nav>
+      <p>Tasks</p>
+      <a href="{{ "/" | relURL }}">Home</a>
+      <a href="{{ "tutorials/qualify-policy/" | relURL }}">Qualify policy</a>
+      <a href="{{ "tutorials/identity-collision/" | relURL }}">Identity collision</a>
+      <p>Reference</p>
+      <a href="../sphinx/_build/html/index.html">Sphinx / Read the Docs</a>
+    </nav>
+    <main>
+      {{ block "main" . }}{{ end }}
+    </main>
+    <footer>{{ .Site.Params.stack }}</footer>
+  </div>
+</body>
+</html>

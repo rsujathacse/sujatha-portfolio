@@ -1,0 +1,94 @@
+$ kubectl get nodes -o wide
+NAME                   STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION   CONTAINER-RUNTIME
+aether-control-plane   Ready    control-plane   16m   v1.32.2   172.18.0.2    <none>        Debian GNU/Linux 12 (bookworm)   6.12.94+         containerd://2.0.2
+
+$ kubectl get pods -A
+NAMESPACE            NAME                                           READY   STATUS             RESTARTS      AGE
+kube-system          cilium-envoy-5dcpd                             0/1     Terminating        0             90s
+kube-system          cilium-operator-6db4759c84-pg7vl               0/1     Terminating        0             92s
+kube-system          cilium-operator-7bfcff947c-vxhhh               0/1     Pending            0             79s
+kube-system          cilium-zp9p8                                   0/1     CrashLoopBackOff   1 (13s ago)   30s
+kube-system          coredns-668d6bf9bc-ncfzb                       0/1     Pending            0             16m
+kube-system          coredns-668d6bf9bc-q7wd5                       0/1     Pending            0             16m
+kube-system          etcd-aether-control-plane                      1/1     Running            0             16m
+kube-system          kube-apiserver-aether-control-plane            1/1     Running            0             16m
+kube-system          kube-controller-manager-aether-control-plane   1/1     Running            0             16m
+kube-system          kube-proxy-lnmnp                               1/1     Running            0             16m
+kube-system          kube-scheduler-aether-control-plane            1/1     Running            0             16m
+local-path-storage   local-path-provisioner-7dc846544d-qgpzg        0/1     Pending            0             16m
+
+$ kubectl -n kube-system get ds,deploy | head
+NAME                          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+daemonset.apps/cilium         1         1         0       1            0           kubernetes.io/os=linux   16m
+daemonset.apps/cilium-envoy   1         1         0       0            0           kubernetes.io/os=linux   16m
+daemonset.apps/kube-proxy     1         1         1       1            1           kubernetes.io/os=linux   16m
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/cilium-operator   0/1     1            0           16m
+deployment.apps/coredns           0/2     2            0           16m
+
+$ cilium status
+    /¯¯\
+ /¯¯\__/¯¯\    Cilium:             2 errors
+ \__/¯¯\__/    Operator:           1 errors, 2 warnings
+ /¯¯\__/¯¯\    Envoy DaemonSet:    2 errors, 1 warnings
+ \__/¯¯\__/    Hubble Relay:       disabled
+    \__/       ClusterMesh:        disabled
+
+DaemonSet              cilium             Desired: 1, Unavailable: 1/1
+DaemonSet              cilium-envoy       Desired: 1, Unavailable: 1/1
+Deployment             cilium-operator    Desired: 1, Unavailable: 1/1
+Containers:            cilium             Running: 1
+                       cilium-envoy       Pending: 1
+                       cilium-operator    Pending: 2
+Cluster Pods:          0/3 managed by Cilium
+Helm chart version:    1.16.6
+Image versions         cilium             docker.io/cilium/cilium:v1.16.6: 1
+                       cilium-envoy       quay.io/cilium/cilium-envoy:v1.30.9-1737073743-40a016d11c0d863b772961ed0168eea6fe6b10a5@sha256:a69dfe0e54b24b0ff747385c8feeae0612cfbcae97bfcc8ee42a773bb3f69c88: 1
+                       cilium-operator    docker.io/cilium/operator-generic:v1.16.6: 1
+                       cilium-operator    quay.io/cilium/operator-generic:v1.16.6@sha256:13d32071d5a52c069fb7c35959a56009c6914439adc73e99e098917646d154fc: 1
+Errors:                cilium             cilium          1 pods of DaemonSet cilium are not ready
+                       cilium             cilium-zp9p8    unable to retrieve cilium status: container cilium-agent is in CrashLoopBackOff, exited with code 1: les
+time=2026-08-30T16:35:32Z level=error msg="Start hook failed" function="ipset.newIPSetManager.func1 (.../iptables/ipset/ipset.go:164) (agent.datapath.iptables.ipset)" error="error while creating ipset cilium_node_set_v4"
+time=2026-08-30T16:35:32Z level=error msg="Start failed" error="error while creating ipset cilium_node_set_v4" duration=64.708435ms
+time=2026-08-30T16:35:32Z level=info msg=Stopping
+time=2026-08-30T16:35:32Z level=error msg="Stop hook failed" function="cmd.newPolicyTrifecta.func3 (cmd/policy.go:154) (agent.controlplane)" error="unable to find controller ipcache-inject-labels"
+time="2026-08-30T16:35:32Z" level=error msg="Close() called without calling InitIdentityAllocator() first" subsys=identity-cache
+time=2026-08-30T16:35:32Z level=info msg="Stop hook executed" function="*job.group.Stop (agent.datapath.iptables)" duration=525.213928ms
+time=2026-08-30T16:35:32Z level=info msg="agent.controlplane.endpoint-manager.endpoint-gc (rev=17)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.ipset.job-ipset-init-finalizer (rev=24)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.ipset.job-reconcile (rev=22)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.ipset.job-refresh (rev=23)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.job-iptables-reconciliation-loop (rev=26)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.sysctl.job-reconcile (rev=28)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.sysctl.job-refresh (rev=27)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.infra.k8s-synced-crdsync.job-sync-crds (rev=6)" module=heal
+             cilium-envoy       cilium-envoy                        1 pods of DaemonSet cilium-envoy are not ready
+             cilium-envoy       cilium-envoy                        daemonset cilium-envoy is rolling out - 0 out of 1 pods updated
+             cilium-operator    cilium-operator                     1 pods of Deployment cilium-operator are not ready
+Warnings:    cilium-envoy       cilium-envoy-5dcpd                  pod is pending
+             cilium-operator    cilium-operator-6db4759c84-pg7vl    pod is pending
+             cilium-operator    cilium-operator-7bfcff947c-vxhhh    pod is pending
+
+$ kubectl -n kube-system logs -l k8s-app=cilium --tail=20
+Defaulted container "cilium-agent" out of: cilium-agent, config (init), mount-cgroup (init), apply-sysctl-overwrites (init), mount-bpf-fs (init), clean-cilium-state (init), install-cni-binaries (init)
+time="2026-08-30T16:35:32Z" level=info msg="Generating CNI configuration file with mode none" subsys=cni-config
+time="2026-08-30T16:35:32Z" level=warning msg="iptables modules could not be initialized. It probably means that iptables is not available on this system" error="could not load module ip_tables: exit status 1" subsys=iptables
+time="2026-08-30T16:35:32Z" level=warning msg="xt_socket kernel module could not be loaded" error="could not load module xt_socket: exit status 1" subsys=iptables
+time="2026-08-30T16:35:32Z" level=info msg="Disabled ip_early_demux to allow proxy redirection with original source/destination address without xt_socket support also in non-tunneled datapath modes." subsys=iptables
+time=2026-08-30T16:35:32Z level=error msg="Start hook failed" function="ipset.newIPSetManager.func1 (.../iptables/ipset/ipset.go:164) (agent.datapath.iptables.ipset)" error="error while creating ipset cilium_node_set_v4"
+time=2026-08-30T16:35:32Z level=error msg="Start failed" error="error while creating ipset cilium_node_set_v4" duration=64.708435ms
+time=2026-08-30T16:35:32Z level=info msg=Stopping
+time=2026-08-30T16:35:32Z level=error msg="Stop hook failed" function="cmd.newPolicyTrifecta.func3 (cmd/policy.go:154) (agent.controlplane)" error="unable to find controller ipcache-inject-labels"
+time="2026-08-30T16:35:32Z" level=error msg="Close() called without calling InitIdentityAllocator() first" subsys=identity-cache
+time=2026-08-30T16:35:32Z level=info msg="Stop hook executed" function="*job.group.Stop (agent.datapath.iptables)" duration=525.213928ms
+time=2026-08-30T16:35:32Z level=info msg="agent.controlplane.endpoint-manager.endpoint-gc (rev=17)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.ipset.job-ipset-init-finalizer (rev=24)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.ipset.job-reconcile (rev=22)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.ipset.job-refresh (rev=23)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.iptables.job-iptables-reconciliation-loop (rev=26)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.sysctl.job-reconcile (rev=28)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.datapath.sysctl.job-refresh (rev=27)" module=health
+time=2026-08-30T16:35:32Z level=info msg="agent.infra.k8s-synced-crdsync.job-sync-crds (rev=6)" module=health
+time="2026-08-30T16:35:32Z" level=info msg="Stopped gops server" address="127.0.0.1:9890" subsys=gops
+time="2026-08-30T16:35:32Z" level=fatal msg="failed to start: error while creating ipset cilium_node_set_v4\nfailed to stop: unable to find controller ipcache-inject-labels" subsys=daemon

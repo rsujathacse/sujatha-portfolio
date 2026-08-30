@@ -20,4 +20,4 @@ include = ["aether*"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
-docs = ["sphinx>=7"]
+docs = ["sphinx>=7,<9", "sphinx-rtd-theme>=3"]

@@ -33,6 +33,10 @@ Exit codes: `IDENTITY_COLLISION` 35, `POLICY_SHADOW_FAILED` 36, `POLICY_NOT_QUAL
 
 Docs:
 
-- Operator tutorial (Hugo/Markdown): `docs/hugo/`
-- CRD/CLI reference (Sphinx/reST): `docs/sphinx/`
+- Operator tutorial (Hugo/Markdown): `docs/hugo/` then `hugo --minify -d public`
+- CRD/CLI/error reference (Sphinx + Read the Docs theme): `docs/sphinx/`
+- Read the Docs config (repo root): `.readthedocs.yaml`
 - Portfolio article: `docs/docs/aether-mesh-self-qualifying-zero-trust.md` in the site root
+- Chrome page captures: `python3 scripts/capture_docs_sites.py`
+- kind + Cilium lab transcripts: `kind/transcripts/` (real kubectl; Hubble not faked)
+
