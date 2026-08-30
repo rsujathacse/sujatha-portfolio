@@ -1,0 +1,22 @@
+apiVersion: aether.mesh/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-to-checkout
+  cluster: prod-us
+spec:
+  endpointSelector:
+    matchLabels:
+      app: checkout
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: frontend
+            cluster: prod-us
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: "/api/cart.*"

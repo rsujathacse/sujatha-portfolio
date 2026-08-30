@@ -2,6 +2,7 @@
 const sidebars = {
   docsSidebar: [
     'intro',
+    'aether-mesh-self-qualifying-zero-trust',
     'helios-hybrid-eda-job-fabric',
     'single-source-documentation-architecture-madcap-flare',
     'opticore-dita-documentation-architecture',

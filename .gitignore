@@ -11,6 +11,11 @@
 # Helios local slice state
 helios/.helios/
 helios-out/
+
+# Aether Mesh local slice state
+aether-mesh/.aether/
+aether-mesh/.aether-docs/
+aether-mesh/docs/sphinx/_build/
 **/__pycache__/
 *.py[cod]
 *.egg-info/
