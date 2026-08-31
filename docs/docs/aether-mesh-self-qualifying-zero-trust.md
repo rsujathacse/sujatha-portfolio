@@ -1,12 +1,12 @@
 ---
-title: Aether Mesh self-qualifying zero-trust
-sidebar_label: Aether Mesh ClusterMesh analog
+title: Qualify ClusterMesh policy before it drops production east-west traffic
+sidebar_label: Qualify ClusterMesh policy
 description: Senior operator guide for a Cilium ClusterMesh and Tetragon analog with a Hypershield-style shadow dataplane. Hugo, Sphinx, Git, CLI, and API.
 pagination_next: null
 pagination_prev: null
 ---
 
-# Aether Mesh: self-qualifying multi-cluster zero-trust
+# Qualify ClusterMesh policy before it drops production east-west traffic
 
 **Document ID:** AETH-OPS-001  
 **Revision:** 1.0  
@@ -15,15 +15,7 @@ pagination_prev: null
 **Source of truth:** Git. Hugo/Markdown tutorials in `aether-mesh/docs/hugo`. Sphinx/reST reference in `aether-mesh/docs/sphinx`.  
 **Related product slice:** `aether` CLI and API, revision 1.0  
 
-## Description
-
 This guide is the human entry point for Aether Mesh, a **runnable analog** of Cilium ClusterMesh identity, Hubble flow replay, identity-aware L3/L7 NetworkPolicy, and Tetragon runtime enforcement. A **shadow dataplane** qualifies policy against golden Hubble flows before promote — the same dual-dataplane idea as Cisco Hypershield self-qualifying updates, implemented in the open so writers can validate procedures.
-
-Aether Mesh is **not** Cilium, **not** Isovalent Enterprise, and **not** Hypershield. It exists so enterprise documentation for that domain has a control plane with real exit codes, drop reasons, and transcripts.
-
-A **kind** cluster was also brought up in this Cloud Agent so `kubectl` is not theoretical. Cilium 1.16.6 was installed. The agent could not start a datapath here (no VXLAN module, no ipset). **Hubble was not faked.** See [kind lab](#kind--cilium-one-cluster-lab).
-
-![Aether Mesh architecture: three ClusterMesh clusters, shadow dataplane, enforce plus Tetragon.](/img/aether-mesh/architecture.jpg)
 
 ## Introduction
 
