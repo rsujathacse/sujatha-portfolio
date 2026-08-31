@@ -19,12 +19,6 @@ pagination_prev: null
 
 This guide is the human entry point for Aether Mesh, a **runnable analog** of Cilium ClusterMesh identity, Hubble flow replay, identity-aware L3/L7 NetworkPolicy, and Tetragon runtime enforcement. A **shadow dataplane** qualifies policy against golden Hubble flows before promote — the same dual-dataplane idea as Cisco Hypershield self-qualifying updates, implemented in the open so writers can validate procedures.
 
-Aether Mesh is **not** Cilium, **not** Isovalent Enterprise, and **not** Hypershield. It exists so enterprise documentation for that domain has a control plane with real exit codes, drop reasons, and transcripts.
-
-A **kind** cluster was also brought up in this Cloud Agent so `kubectl` is not theoretical. Cilium 1.16.6 was installed. The agent could not start a datapath here (no VXLAN module, no ipset). **Hubble was not faked.** See [kind lab](#kind--cilium-one-cluster-lab).
-
-![Aether Mesh architecture: three ClusterMesh clusters, shadow dataplane, enforce plus Tetragon.](/img/aether-mesh/architecture.jpg)
-
 ## Introduction
 
 A shop-prod mesh spans `prod-us`, `prod-eu`, and `prod-ap`. Checkout in the US talks to payments in the EU. Payments talks to inventory in AP. A frontend replica in AP shares labels with the US frontend but must **not** inherit its identity. Numeric security identities include cluster-id. Duplicate cluster-ids collide. Policy that is only label-based then becomes unsafe.
