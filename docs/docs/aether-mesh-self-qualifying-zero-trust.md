@@ -1,12 +1,12 @@
 ---
-title: Aether Mesh self-qualifying zero-trust
-sidebar_label: Aether Mesh ClusterMesh analog
+title: Qualify ClusterMesh policy before it drops production east-west traffic
+sidebar_label: Qualify ClusterMesh policy
 description: Senior operator guide for a Cilium ClusterMesh and Tetragon analog with a Hypershield-style shadow dataplane. Hugo, Sphinx, Git, CLI, and API.
 pagination_next: null
 pagination_prev: null
 ---
 
-# Aether Mesh: self-qualifying multi-cluster zero-trust
+# Qualify ClusterMesh policy before it drops production east-west traffic
 
 **Document ID:** AETH-OPS-001  
 **Revision:** 1.0  
@@ -14,8 +14,6 @@ pagination_prev: null
 **Author:** Sujatha R, Senior Technical Writer  
 **Source of truth:** Git. Hugo/Markdown tutorials in `aether-mesh/docs/hugo`. Sphinx/reST reference in `aether-mesh/docs/sphinx`.  
 **Related product slice:** `aether` CLI and API, revision 1.0  
-
-## Description
 
 This guide is the human entry point for Aether Mesh, a **runnable analog** of Cilium ClusterMesh identity, Hubble flow replay, identity-aware L3/L7 NetworkPolicy, and Tetragon runtime enforcement. A **shadow dataplane** qualifies policy against golden Hubble flows before promote — the same dual-dataplane idea as Cisco Hypershield self-qualifying updates, implemented in the open so writers can validate procedures.
 
