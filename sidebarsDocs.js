@@ -2,6 +2,7 @@
 const sidebars = {
   docsSidebar: [
     'intro',
+    'camunda-8-zero-downtime-kubernetes-upgrade-runbook',
     'aether-mesh-self-qualifying-zero-trust',
     'helios-hybrid-eda-job-fabric',
     'single-source-documentation-architecture-madcap-flare',
